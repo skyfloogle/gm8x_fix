@@ -14,7 +14,7 @@
 	return 1;
 #define puts if (!silent) puts
 #define printf if (!silent) printf
-#define getchar if (!silent) getchar
+#define wait() if (!silent) while (getchar() != '\n');
 
 typedef struct Patch_t {
 	int pos;
@@ -22,8 +22,12 @@ typedef struct Patch_t {
 	int new;
 } Patch;
 
-Patch patches_80[];
-Patch patches_81[];
+Patch joypatch_80[];
+Patch joypatch_81[];
+Patch dplaypatch_80[];
+Patch dplaypatch_81[];
+
+bool silent = false;
 
 static int can_patch(FILE *f, Patch patches[]) {
 	// returns 2 if already patched, 1 if unpatched, 0 if it's not the right file
@@ -54,9 +58,19 @@ static void patch_exe(FILE *f, Patch patches[]) {
 	}
 }
 
+static bool prompt(const char *text) {
+	if (silent) return true;
+	int c = 0;
+	while (c != 'y' && c != 'n' && c != 'Y' && c != 'N') {
+		printf(text);
+		c = getchar();
+		while (getchar() != '\n');
+	}
+	return (c == 'y' || c == 'Y');
+}
+
 int main(int argc, const char *argv[]) {
 	// check arguments
-	bool silent = false;
 	const char *fn = NULL;
 	bool valid_args = true;
 	if (argc == 2) {
@@ -72,15 +86,15 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to joyfix v0.1 by fishmilk!");
-	puts("Source code is at https://github.com/vismelk/joyfix under MIT license.");
+	puts("Welcome to joyfix v0.2 by fishmilk!");
+	puts("Source code is at https://github.com/vismelk/gm8x_fix under MIT license.");
 	puts("------");
 	// compain about arguments if necessary
 	if (!valid_args) {
 		puts("Error: Invalid arguments.");
 		puts("Please drag your Game Maker game onto the patcher's executable file.");
 		puts("Or if you're a commandline nerd, run with this:");
-		puts(" joypatch [-s] FILE");
+		puts(" gm8x_fix [-s] FILE");
 		puts("Add -s to remove commandline output.");
 		CLOSE_PATCHER;
 	}
@@ -89,147 +103,166 @@ int main(int argc, const char *argv[]) {
 		printf("Could not open file (errno %i).\n", errno);
 		CLOSE_PATCHER;
 	}
-	// identify type
-	bool mempatched;
 	printf("Inspecting file: %s\n", argv[1]);
 	if (fgetc(f) != 'M' || fgetc(f) != 'Z') {
 		fclose(f);
 		puts("This is not an executable file.");
 		CLOSE_PATCHER;
 	}
-	bool gm80;
-	bool gm81;
+	// identify patches
 	fseek(f, 0x116, SEEK_SET);
-	mempatched = fgetc(f) & 0x0020; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
-	gm80 = can_patch(f, patches_80);
-	gm81 = can_patch(f, patches_81);
-	if (gm80 == gm81 && gm80 != 0) {
-		puts("This is somehow both a GM8.0 and a GM8.1 game? It's probably neither really, I'm not touching that.");
-		if (!mempatched) {
-			puts("I suppose you could still add the memory patch if you want.");
-		} else {
-			CLOSE_PATCHER;
-		}
-	} else if (gm80 == 2 && mempatched) {
-		puts("This GM8.0 game has already got both the joyfix and the memory patch.");
+	bool mempatch = !(!(fgetc(f) & 0x0020))+1; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
+	bool joy80 = can_patch(f, joypatch_80);
+	bool joy81 = can_patch(f, joypatch_81);
+	bool dplay80 = can_patch(f, dplaypatch_80);
+	bool dplay81 = can_patch(f, dplaypatch_81);
+	// list patches
+	if (mempatch == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2) {
+		puts("Patches already applied:");
+		if (mempatch == 2) puts("* Memory patch");
+		if (joy80 == 2) puts("* GM8.0 joystick patch");
+		if (joy81 == 2) puts("* GM8.1 joystick patck");
+		if (dplay80 == 2) puts("* GM8.0 DirectPlay patch");
+		if (dplay81 == 2) puts("* GM8.1 DirectPlay patch");
+	}
+	if (mempatch == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1) {
+		puts("Patches that can be applied:");
+		if (mempatch == 1) puts("* Memory patch");
+		if (joy80 == 1) puts("* GM8.0 joystick patch");
+		if (joy81 == 1) puts("* GM8.1 joystick patck");
+		if (dplay80 == 1) puts("* GM8.0 DirectPlay patch");
+		if (dplay81 == 1) puts("* GM8.1 DirectPlay patch");
+	} else {
+		puts("No new patches can be applied.");
+		fclose(f);
 		CLOSE_PATCHER;
-	} else if (gm81 == 2 && mempatched) {
-		puts("This GM8.1 game has already got both the joyfix and the memory patch.");
-		CLOSE_PATCHER;
-	} else if (gm80 == 2) {
-		puts("This GM8.0 game already has the joyfix. You can still apply the memory patch though.");
-	} else if (gm81 == 2) {
-		puts("This GM8.1 game already has the joyfix. You can still apply the memory patch though.");
-	} else if (!gm80 && !gm81 && mempatched) {
-		puts("This is neither an unpatched GM8.0 nor an unpatched GM8.1 game, and the memory patch will be redundant on this program.");
-		puts("No actions will be taken.");
-		CLOSE_PATCHER;
-	} else if (!gm80 && !gm81) {
-		puts("This is neither an unpatched GM8.0 nor an unpatched GM8.1 game. You can still apply the memory patch though.");
 	}
 	// make backup filename
 	char *bak_fn = malloc(strlen(fn) + 5);
 	strcpy(bak_fn, fn);
 	strcat(bak_fn, ".bak");
 	// ask for confirmation
-	printf("Identified as a Game Maker 8.");
-	if (gm80)
-		printf("0");
-	else
-		printf("1");
-	printf(" game with");
-	if (!mempatched)
-		printf("out");
-	printf(" the memory patch.\n");
-	puts("Patches to be applied:");
-	if (gm80)
-		puts("* GM8.0 joystick patch");
-	if (gm81)
-		puts("* GM8.1 joystick patch");
-	if (!mempatched)
-		puts("* Memory patch");
 	printf("Will make a backup to %s\n", bak_fn);
-	puts("Press Enter to make a backup and apply the patch.");
-	getchar();
+	printf("Press Enter to make a backup and choose patches to apply. ");
+	wait();
 	fclose(f); // i waited until here to close it so you can't mess with the file before confirming
 	puts("Making backup...");
+	bool can_backup = true;
 	// rename the original
-	if (rename(fn, bak_fn) != 0) {
-		printf("Failed to add .bak to the filename (errno %i).\n", errno);
-		CLOSE_PATCHER;
+	if (rename(fn, bak_fn)) {
+		if (errno == EEXIST) {
+			errno = 0;
+			printf("There is already a file in location %s\n", bak_fn);
+			if (prompt("Overwrite it? [y/n] ")) {
+				if (remove(bak_fn)) {
+					printf("Could not remove existing file (errno %i).\n", errno);
+					if (prompt("Continue without making a backup? [y/n] ")) {
+						can_backup = false;
+					} else {
+						CLOSE_PATCHER;
+					}
+				} else {
+					if (rename(fn, bak_fn)) {
+						printf("The existing file was deleted, but the backup could still not be made (errno %i).\n", errno);
+						puts("I hope there wasn't anything important in there...");
+						if (prompt("Continue without making a backup? [y/n] ")) {
+							can_backup = false;
+						} else {
+							CLOSE_PATCHER;
+						}
+					}
+				}
+			} else {
+				can_backup = false;
+			}
+		} else {
+			printf("Failed to add .bak to the filename (errno %i).\n", errno);
+			if (prompt("Continue without making a backup? [y/n] ")) {
+				can_backup = false;
+			} else {
+				CLOSE_PATCHER;
+			}
+		}
 	}
-	// copy it to the original location
-	char *copy_cmd = malloc(strlen(bak_fn) * 4);
+	if (can_backup) {
+		// copy it to the original location
+		char *copy_cmd = malloc(strlen(bak_fn) * 4);
 #ifdef _WIN32
-	// windows files can't have quotes so no sanitation necessary
-	strcpy(copy_cmd, "copy \"");
-	strcat(copy_cmd, bak_fn);
-	strcat(copy_cmd, "\" \"");
-	strcat(copy_cmd, fn);
-	strcat(copy_cmd, "\"");
+		// windows files can't have quotes so no sanitation necessary
+		strcpy(copy_cmd, "copy \"");
+		strcat(copy_cmd, bak_fn);
+		strcat(copy_cmd, "\" \"");
+		strcat(copy_cmd, fn);
+		strcat(copy_cmd, "\"");
 #else
-	// unix files can have quotes so gotta sanitize
-	strcpy(copy_cmd, "cp \"");
-	char *copy_cmd_ptr = copy_cmd+4;
-	for (int i = 0; i < strlen(bak_fn); i++) {
-		if (bak_fn[i] != '"') {
-			*copy_cmd_ptr++ = bak_fn[i];
-		} else {
-			*copy_cmd_ptr++ = '\\';
-			*copy_cmd_ptr++ = '"';
+		// unix files can have quotes so gotta sanitize
+		strcpy(copy_cmd, "cp \"");
+		char *copy_cmd_ptr = copy_cmd+4;
+		for (int i = 0; i < strlen(bak_fn); i++) {
+			if (bak_fn[i] != '"') {
+				*copy_cmd_ptr++ = bak_fn[i];
+			} else {
+				*copy_cmd_ptr++ = '\\';
+				*copy_cmd_ptr++ = '"';
+			}
 		}
-	}
-	*copy_cmd_ptr++ = '"';
-	*copy_cmd_ptr++ = ' ';
-	*copy_cmd_ptr++ = '"';
-	for (int i = 0; i < strlen(fn); i++) {
-		if (fn[i] != '"') {
-			*copy_cmd_ptr++ = fn[i];
-		} else {
-			*copy_cmd_ptr++ = '\\';
-			*copy_cmd_ptr++ = '"';
+		*copy_cmd_ptr++ = '"';
+		*copy_cmd_ptr++ = ' ';
+		*copy_cmd_ptr++ = '"';
+		for (int i = 0; i < strlen(fn); i++) {
+			if (fn[i] != '"') {
+				*copy_cmd_ptr++ = fn[i];
+			} else {
+				*copy_cmd_ptr++ = '\\';
+				*copy_cmd_ptr++ = '"';
+			}
 		}
-	}
-	*copy_cmd_ptr++ = '"';
-	*copy_cmd_ptr++ = 0;
-#endif
-	int res = system(copy_cmd);
-	if (res != 0) {
-		printf("File copy failed (error code %i).\n", res);
-		if (rename(bak_fn, fn) != 0) {
-			printf("Could not restore the original file (errno %i).\n", errno);
-			puts("Your game will have had .bak added to its filename, and no ");
-			puts("patches have been applied.");
-		} else {
-			puts("The backup has been restored and the game is unchanged.");
+		*copy_cmd_ptr++ = '"';
+		*copy_cmd_ptr++ = 0;
+	#endif
+		int res = system(copy_cmd);
+		if (res != 0) {
+			printf("File copy failed (error code %i).\n", res);
+			if (rename(bak_fn, fn) != 0) {
+				printf("Could not restore the original file (errno %i).\n", errno);
+				puts("Your game will have had .bak added to its filename, and no ");
+				puts("patches have been applied.");
+			} else {
+				puts("The backup has been restored and the game is unchanged.");
+			}
+			free(bak_fn);
+			free(copy_cmd);
+			CLOSE_PATCHER;
 		}
 		free(bak_fn);
 		free(copy_cmd);
-		CLOSE_PATCHER;
+	} else {
+		puts("Not backing up.");
 	}
-	free(bak_fn);
-	free(copy_cmd);
-	// apply the patch
+	// apply the patches
 	f = fopen(fn, "rb+");
-	puts("Applying patches...");
-	if (!mempatched) {
+	if (mempatch == 1 && prompt("Apply memory patch? [y/n] ")) {
 		fseek(f, 0x116, SEEK_SET);
 		int c = fgetc(f);
 		fseek(f, 0x116, SEEK_SET);
 		fputc(c | 0x0020, f);
 	}
-	if (gm80)
-		patch_exe(f, patches_80);
-	else if (gm81)
-		patch_exe(f, patches_81);
+	if (joy80 == 1 && prompt("Apply GM8.0 joystick patch? [y/n] "))
+		patch_exe(f, joypatch_80);
+	if (joy81 == 1 && prompt("Apply GM8.1 joystick patch? [y/n] "))
+		patch_exe(f, joypatch_81);
+	if (dplay80 == 1 && prompt("Apply GM8.0 DirectPlay patch? [y/n] "))
+		patch_exe(f, dplaypatch_80);
+	if (dplay81 == 1 && prompt("Apply GM8.1 DirectPlay patch? [y/n] "))
+		patch_exe(f, dplaypatch_81);
 	fclose(f);
 	puts("All done!");
 	puts("Press Enter to close the patcher.");
-	getchar();
+	wait();
 	return 0;
 }
 
-Patch patches_80[] = {
+Patch joypatch_80[] = {
 	{ 0x1399df, 0x53, 0xb8 },
 	{ 0x1399e0, 0x6a, 0xa5 },
 	{ 0x1399e2, 0xe8, 0x0 },
@@ -382,7 +415,7 @@ Patch patches_80[] = {
 	{-1,0,0}
 };
 
-Patch patches_81[] = {
+Patch joypatch_81[] = {
 	{ 0x1f6ce7, 0x53, 0xb8 },
 	{ 0x1f6ce8, 0x6a, 0xa5 },
 	{ 0x1f6cea, 0xe8, 0x0 },
@@ -532,5 +565,15 @@ Patch patches_81[] = {
 	{ 0x245163, 0x74, 0x0 },
 	{ 0x245164, 0xec, 0x90 },
 	{ 0x245165, 0xff, 0x90 },
+	{-1,0,0}
+};
+
+Patch dplaypatch_80[] = {
+	{ 0x187380, 'D', 0 },
+	{-1,0,0}
+};
+
+Patch dplaypatch_81[] = {
+	{ 0x279c10, 'D', 0 },
 	{-1,0,0}
 };
