@@ -1,5 +1,6 @@
 gm8x_fix is a patcher that fixes certain issues in games made with
-GameMaker 8.x.
+GameMaker 8.x. You can download the latest release from the
+[Releases](https://github.com/vismelk/gm8x_fix/releases) tab.
 
 # How do I use it?
 Drag the executable file for your game onto gm8x_fix.exe. Or, if you're a
