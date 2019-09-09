@@ -27,7 +27,8 @@ that pretends there are no joysticks connected. Basically, it completely
 disables joystick support.
 
 Some games also run into issues on some newer computers where the game crashes
-on startup with the message "Unexpected error occured when running the game."<br/>
+on startup with the message "Unexpected error occured when running the game" or
+"Out of memory".<br/>
 This can, on some games, be fixed by enabling the flag in the header that tells
 the OS the program can understand addresses bigger than 2GB. Shoutouts to
 [these guys](https://iwannacommunity.com/forum/index.php@topic=2308.msg16505.html)
