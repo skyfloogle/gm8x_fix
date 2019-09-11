@@ -86,8 +86,8 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to joyfix v0.2 by fishmilk!");
-	puts("Source code is at https://github.com/vismelk/gm8x_fix under MIT license.");
+	puts("Welcome to gm8x_fix v0.2!");
+	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("------");
 	// compain about arguments if necessary
 	if (!valid_args) {
