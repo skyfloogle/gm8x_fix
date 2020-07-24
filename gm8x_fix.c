@@ -26,6 +26,8 @@ Patch joypatch_80[];
 Patch joypatch_81[];
 Patch dplaypatch_80[];
 Patch dplaypatch_81[];
+Patch schedpatch_80[];
+Patch schedpatch_81[];
 
 bool silent = false;
 
@@ -86,9 +88,9 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.2!");
+	puts("Welcome to gm8x_fix v0.3!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
-	puts("------");
+	puts("---------------------------------------------------------------------------");
 	// compain about arguments if necessary
 	if (!valid_args) {
 		puts("Error: Invalid arguments.");
@@ -116,6 +118,8 @@ int main(int argc, const char *argv[]) {
 	bool joy81 = can_patch(f, joypatch_81);
 	bool dplay80 = can_patch(f, dplaypatch_80);
 	bool dplay81 = can_patch(f, dplaypatch_81);
+	bool sched80 = can_patch(f, schedpatch_80);
+	bool sched81 = can_patch(f, schedpatch_81);
 	// list patches
 	if (mempatch == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2) {
 		puts("Patches already applied:");
@@ -124,14 +128,18 @@ int main(int argc, const char *argv[]) {
 		if (joy81 == 2) puts("* GM8.1 joystick patck");
 		if (dplay80 == 2) puts("* GM8.0 DirectPlay patch");
 		if (dplay81 == 2) puts("* GM8.1 DirectPlay patch");
+		if (sched80 == 2) puts("* GM8.0 scheduler patch");
+		if (sched81 == 2) puts("* GM8.1 scheduler patch");
 	}
 	if (mempatch == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1) {
 		puts("Patches that can be applied:");
 		if (mempatch == 1) puts("* Memory patch");
 		if (joy80 == 1) puts("* GM8.0 joystick patch");
-		if (joy81 == 1) puts("* GM8.1 joystick patck");
+		if (joy81 == 1) puts("* GM8.1 joystick patch");
 		if (dplay80 == 1) puts("* GM8.0 DirectPlay patch");
 		if (dplay81 == 1) puts("* GM8.1 DirectPlay patch");
+		if (sched80 == 1) puts("* GM8.0 scheduler patch (requires joystick patch)");
+		if (sched81 == 1) puts("* GM8.1 scheduler patch (requires joystick patch)");
 	} else {
 		puts("No new patches can be applied.");
 		fclose(f);
@@ -247,14 +255,26 @@ int main(int argc, const char *argv[]) {
 		fseek(f, 0x116, SEEK_SET);
 		fputc(c | 0x0020, f);
 	}
-	if (joy80 == 1 && prompt("Apply GM8.0 joystick patch? [y/n] "))
+	bool joy_patched = (joy80 == 2 || joy81 == 2);
+	if (joy80 == 1 && prompt("Apply GM8.0 joystick patch? [y/n] ")) {
 		patch_exe(f, joypatch_80);
-	if (joy81 == 1 && prompt("Apply GM8.1 joystick patch? [y/n] "))
+		joy_patched = true;
+	}
+	if (joy81 == 1 && prompt("Apply GM8.1 joystick patch? [y/n] ")) {
 		patch_exe(f, joypatch_81);
+		joy_patched = true;
+	}
 	if (dplay80 == 1 && prompt("Apply GM8.0 DirectPlay patch? [y/n] "))
 		patch_exe(f, dplaypatch_80);
 	if (dplay81 == 1 && prompt("Apply GM8.1 DirectPlay patch? [y/n] "))
 		patch_exe(f, dplaypatch_81);
+	if ((sched80 == 1 || sched81 == 1) && !joy_patched) {
+		puts("It looks like the joystick patch wasn't applied. It's best to apply that if you're going to use the scheduler patch.");
+	}
+	if (sched80 == 1 && prompt("Apply GM8.0 scheduler patch? [y/n] "))
+		patch_exe(f, schedpatch_80);
+	if (sched81 == 1 && prompt("Apply GM8.1 scheduler patch? [y/n] "))
+		patch_exe(f, schedpatch_81);
 	fclose(f);
 	puts("All done!");
 	puts("Press Enter to close the patcher.");
@@ -575,5 +595,63 @@ Patch dplaypatch_80[] = {
 
 Patch dplaypatch_81[] = {
 	{ 0x279c10, 'D', 0 },
+	{-1,0,0}
+};
+
+Patch schedpatch_80[] = {
+	{0x14461a, 0xb8, 0x6a},
+	{0x14461b, 0x2d, 0x01},
+	{0x14461c, 0x00, 0xe8},
+	{0x14461d, 0x00, 0x17},
+	{0x14461e, 0x00, 0xcf},
+	{0x14461f, 0xe8, 0xf3},
+	{0x144620, 0x18, 0xff},
+	{0x144621, 0xef, 0x90},
+	{0x144622, 0xff, 0x90},
+	{0x144623, 0xff, 0x90},
+	{0x191e82, 0x6a, 0x74},
+	{0x191e83, 0x6f, 0x69},
+	{0x191e84, 0x79, 0x6d},
+	{0x191e85, 0x47, 0x65},
+	{0x191e86, 0x65, 0x42},
+	{0x191e87, 0x74, 0x65},
+	{0x191e88, 0x44, 0x67},
+	{0x191e89, 0x65, 0x69},
+	{0x191e8a, 0x76, 0x6e},
+	{0x191e8b, 0x43, 0x50},
+	{0x191e8c, 0x61, 0x65},
+	{0x191e8d, 0x70, 0x72},
+	{0x191e8e, 0x73, 0x69},
+	{0x191e8f, 0x41, 0x6f},
+	{0x191e90, 0x00, 0x64},
+	{-1,0,0}
+};
+
+Patch schedpatch_81[] = {
+	{0x279f23, 0xb8, 0x6a},
+	{0x279f24, 0x20, 0x01},
+	{0x279f25, 0xb1, 0xe8},
+	{0x279f26, 0x67, 0xe2},
+	{0x279f27, 0x00, 0x22},
+	{0x279f28, 0xe8, 0xe9},
+	{0x279f29, 0xd7, 0xff},
+	{0x279f2a, 0x67, 0x90},
+	{0x279f2b, 0xee, 0x90},
+	{0x279f2c, 0xff, 0x90},
+	{0x28be88, 0x6a, 0x74},
+	{0x28be89, 0x6f, 0x69},
+	{0x28be8a, 0x79, 0x6d},
+	{0x28be8b, 0x47, 0x65},
+	{0x28be8c, 0x65, 0x42},
+	{0x28be8d, 0x74, 0x65},
+	{0x28be8e, 0x44, 0x67},
+	{0x28be8f, 0x65, 0x69},
+	{0x28be90, 0x76, 0x6e},
+	{0x28be91, 0x43, 0x50},
+	{0x28be92, 0x61, 0x65},
+	{0x28be93, 0x70, 0x72},
+	{0x28be94, 0x73, 0x69},
+	{0x28be95, 0x57, 0x6f},
+	{0x28be96, 0x00, 0x64},
 	{-1,0,0}
 };

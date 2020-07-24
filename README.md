@@ -1,3 +1,4 @@
+# gm8x_fix
 gm8x_fix is a patcher that fixes certain issues in games made with
 GameMaker 8.x. You can download the latest release from the
 [Releases](https://github.com/skyfloogle/gm8x_fix/releases/latest) tab.
@@ -15,6 +16,7 @@ For building, you can just build the C file with your favourite compiler, it
 doesn't have any dependencies.
 
 # The issues this fixes, and how it fixes them
+## The joystick patch
 Early versions of GameMaker have a *terrible* implementation of joystick
 support, which can cause games to slow down if joysticks are installed but not
 plugged in. This slowdown exists on games that don't use the joystick
@@ -26,6 +28,26 @@ This patch replaces literally every call to the joystick API with some code
 that pretends there are no joysticks connected. Basically, it completely
 disables joystick support.
 
+## The scheduler patch
+Between frames, GameMaker calls
+[Sleep](https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-sleep)
+in order to limit the framerate. Unfortunately, this function isn't very precise,
+which means games can sleep for longer than they were intended to, which may lead
+to sluggish or inconsistent framerates on some computers. There is a function called
+[timeBeginPeriod](https://docs.microsoft.com/en-us/windows/win32/api/timeapi/nf-timeapi-timebeginperiod)
+which allows us to make the function more precise, but GameMaker doesn't use it
+out of the box. This patch invokes that function at game start and improves
+the precision. The patch overwrites the import for one of the joystick functions,
+so using the scheduler patch without the joystick patch may cause issues.
+
+[Here's](https://www.youtube.com/watch?v=oGg06HMPASg) a YouTube video with a more
+detailed explanation.
+
+This fix also exists as a DLL hack for GameMaker 8.1 and up (no 8.0, sorry).
+This includes GameMaker:Studio.
+[Click here for more information on gms_scheduler_fix.](https://github.com/omicronrex/gms_scheduler_fix)
+
+## The memory patch
 Some games also run into issues on some newer computers where the game crashes
 on startup with the message "Unexpected error occured when running the game" or
 "Out of memory".<br/>
@@ -34,6 +56,7 @@ the OS the program can understand addresses bigger than 2GB. Shoutouts to
 [these guys](https://iwannacommunity.com/forum/index.php@topic=2308.msg16505.html)
 for finding that.
 
+## The DirectPlay patch
 GameMaker games use DirectPlay for networking, but loading the DirectPlay DLL
 on newer versions of Windows brings up a prompt because DirectPlay is
 deprecated. In fact, on newer versions of Windows, it just doesn't work at all.<br/>
@@ -51,3 +74,6 @@ The DirectPlay patch will break networking. Any calls to the networking
 functions will probably trigger an access violation. If this causes problems
 outside of multiplayer modes in any games, open an issue and I'll make a less
 janky solution.
+
+The scheduler patch overwrites some debug logging, but that shouldn't cause any
+issues.
