@@ -113,15 +113,15 @@ int main(int argc, const char *argv[]) {
 	}
 	// identify patches
 	fseek(f, 0x116, SEEK_SET);
-	bool mempatch = !(!(fgetc(f) & 0x0020))+1; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
-	bool joy80 = can_patch(f, joypatch_80);
-	bool joy81 = can_patch(f, joypatch_81);
-	bool dplay80 = can_patch(f, dplaypatch_80);
-	bool dplay81 = can_patch(f, dplaypatch_81);
-	bool sched80 = can_patch(f, schedpatch_80);
-	bool sched81 = can_patch(f, schedpatch_81);
+	int mempatch = !(!(fgetc(f) & 0x0020))+1; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
+	int joy80 = can_patch(f, joypatch_80);
+	int joy81 = can_patch(f, joypatch_81);
+	int dplay80 = can_patch(f, dplaypatch_80);
+	int dplay81 = can_patch(f, dplaypatch_81);
+	int sched80 = can_patch(f, schedpatch_80);
+	int sched81 = can_patch(f, schedpatch_81);
 	// list patches
-	if (mempatch == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2) {
+	if (mempatch == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2 || sched80 == 2 || sched81 == 2) {
 		puts("Patches already applied:");
 		if (mempatch == 2) puts("* Memory patch");
 		if (joy80 == 2) puts("* GM8.0 joystick patch");
@@ -131,7 +131,7 @@ int main(int argc, const char *argv[]) {
 		if (sched80 == 2) puts("* GM8.0 scheduler patch");
 		if (sched81 == 2) puts("* GM8.1 scheduler patch");
 	}
-	if (mempatch == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1) {
+	if (mempatch == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1 || sched80 == 1 || sched81 == 1) {
 		puts("Patches that can be applied:");
 		if (mempatch == 1) puts("* Memory patch");
 		if (joy80 == 1) puts("* GM8.0 joystick patch");
