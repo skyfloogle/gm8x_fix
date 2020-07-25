@@ -11,7 +11,7 @@
 		puts("Press Enter to close the patcher."); \
 		getchar(); \
 	} \
-	return 1;
+	exit(1);
 #define puts if (!silent) puts
 #define printf if (!silent) printf
 #define wait() if (!silent) while (getchar() != '\n');
@@ -22,11 +22,13 @@ typedef struct Patch_t {
 	int new;
 } Patch;
 
+Patch upx_80[];
 Patch joypatch_80[];
 Patch joypatch_81[];
 Patch dplaypatch_80[];
 Patch dplaypatch_81[];
 Patch schedpatch_80[];
+Patch schedpatch_80upx[];
 Patch schedpatch_81[];
 
 bool silent = false;
@@ -53,11 +55,25 @@ static int can_patch(FILE *f, Patch patches[]) {
 	return 0;
 }
 
-static void patch_exe(FILE *f, Patch patches[]) {
-	for (Patch *p = patches; p->pos != -1; p++) {
-		fseek(f, p->pos, SEEK_SET);
-		fputc(p->new, f);
+static void strcatfn(char *s, const char *fn) {
+#ifdef _WIN32
+	// windows files can't have quotes so no sanitation necessary
+	strcat(s, "\"");
+	strcat(s, fn);
+	strcat(s, "\"");
+#else
+	// unix files can have quotes so gotta sanitize
+	for (int i = 0; i < strlen(fn); i++) {
+		if (fn[i] != '"') {
+			*s++ = fn[i];
+		} else {
+			*s++ = '\\';
+			*s++ = '"';
+		}
 	}
+	*s++ = '"';
+	*s++ = 0;
+#endif
 }
 
 static bool prompt(const char *text) {
@@ -71,89 +87,8 @@ static bool prompt(const char *text) {
 	return (c == 'y' || c == 'Y');
 }
 
-int main(int argc, const char *argv[]) {
-	// check arguments
-	const char *fn = NULL;
-	bool valid_args = true;
-	if (argc == 2) {
-		fn = argv[1];
-	} else if (argc == 3) {
-		if (strcmp(argv[1], "-s") == 0) {
-			silent = true;
-			fn = argv[2];
-		} else {
-			valid_args = false;
-		}
-	} else {
-		valid_args = false;
-	}
-	// funny title
-	puts("Welcome to gm8x_fix v0.3!");
-	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
-	puts("---------------------------------------------------------------------------");
-	// compain about arguments if necessary
-	if (!valid_args) {
-		puts("Error: Invalid arguments.");
-		puts("Please drag your Game Maker game onto the patcher's executable file.");
-		puts("Or if you're a commandline nerd, run with this:");
-		puts(" gm8x_fix [-s] FILE");
-		puts("Add -s to remove commandline output.");
-		CLOSE_PATCHER;
-	}
-	FILE *f = fopen(fn, "rb");
-	if (f == NULL) {
-		printf("Could not open file (errno %i).\n", errno);
-		CLOSE_PATCHER;
-	}
-	printf("Inspecting file: %s\n", argv[1]);
-	if (fgetc(f) != 'M' || fgetc(f) != 'Z') {
-		fclose(f);
-		puts("This is not an executable file.");
-		CLOSE_PATCHER;
-	}
-	// identify patches
-	fseek(f, 0x116, SEEK_SET);
-	int mempatch = !(!(fgetc(f) & 0x0020))+1; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
-	int joy80 = can_patch(f, joypatch_80);
-	int joy81 = can_patch(f, joypatch_81);
-	int dplay80 = can_patch(f, dplaypatch_80);
-	int dplay81 = can_patch(f, dplaypatch_81);
-	int sched80 = can_patch(f, schedpatch_80);
-	int sched81 = can_patch(f, schedpatch_81);
-	// list patches
-	if (mempatch == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2 || sched80 == 2 || sched81 == 2) {
-		puts("Patches already applied:");
-		if (mempatch == 2) puts("* Memory patch");
-		if (joy80 == 2) puts("* GM8.0 joystick patch");
-		if (joy81 == 2) puts("* GM8.1 joystick patck");
-		if (dplay80 == 2) puts("* GM8.0 DirectPlay patch");
-		if (dplay81 == 2) puts("* GM8.1 DirectPlay patch");
-		if (sched80 == 2) puts("* GM8.0 scheduler patch");
-		if (sched81 == 2) puts("* GM8.1 scheduler patch");
-	}
-	if (mempatch == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1 || sched80 == 1 || sched81 == 1) {
-		puts("Patches that can be applied:");
-		if (mempatch == 1) puts("* Memory patch");
-		if (joy80 == 1) puts("* GM8.0 joystick patch");
-		if (joy81 == 1) puts("* GM8.1 joystick patch");
-		if (dplay80 == 1) puts("* GM8.0 DirectPlay patch");
-		if (dplay81 == 1) puts("* GM8.1 DirectPlay patch");
-		if (sched80 == 1) puts("* GM8.0 scheduler patch (requires joystick patch)");
-		if (sched81 == 1) puts("* GM8.1 scheduler patch (requires joystick patch)");
-	} else {
-		puts("No new patches can be applied.");
-		fclose(f);
-		CLOSE_PATCHER;
-	}
-	// make backup filename
-	char *bak_fn = malloc(strlen(fn) + 5);
-	strcpy(bak_fn, fn);
-	strcat(bak_fn, ".bak");
-	// ask for confirmation
-	printf("Will make a backup to %s\n", bak_fn);
-	printf("Press Enter to make a backup and choose patches to apply. ");
-	wait();
-	fclose(f); // i waited until here to close it so you can't mess with the file before confirming
+// return true if a backup can be made
+static bool rename_for_backup(const char *fn, const char *bak_fn) {
 	puts("Making backup...");
 	bool can_backup = true;
 	// rename the original
@@ -192,63 +127,219 @@ int main(int argc, const char *argv[]) {
 			}
 		}
 	}
-	if (can_backup) {
-		// copy it to the original location
-		char *copy_cmd = malloc(strlen(bak_fn) * 4);
+	return can_backup;
+}
+
+// de-upx if necessary, return true if unpacked
+static bool upx(FILE **fp, const char *fn, const char *argv0) {
+	FILE *f = *fp;
+	// identify UPX headers
+	fseek(f, 0x170, SEEK_SET);
+	const char head1[] = {0x55, 0x50, 0x58, 0x30, 0, 0, 0, 0};
+	for (int i = 0; i < 8; i++) {
+		if (fgetc(f) != head1[i]) return false;
+	}
+	fseek(f, 0x198, SEEK_SET);
+	const char head2[] = {0x55, 0x50, 0x58, 0x31, 0, 0, 0, 0};
+	for (int i = 0; i < 8; i++) {
+		if (fgetc(f) != head2[i]) return false;
+	}
+	// make backup filename
+	char *bak_fn = malloc(strlen(fn) + 5);
+	strcpy(bak_fn, fn);
+	strcat(bak_fn, ".bak");
+	// ask for confirmation
+	printf("Will make a backup to %s\n", bak_fn);
+	puts("Looks like your game was packed with UPX. We need to unpack it first.");
+	puts("Please download the latest release of UPX from https://github.com/upx/upx/releases/tag/v3.96");
+	puts("and put upx.exe in the same directory as gm8x_fix.exe, then press Enter to unpack.");
+	wait();
+	// rename original
+	fclose(f);
+	bool can_backup = rename_for_backup(fn, bak_fn);
+	// get upx path
+	char *cmd_buf = malloc(strlen(bak_fn) * 4 + strlen(argv0));
+	int path_len = strlen(argv0);
+	while (path_len > 0 && argv0[path_len-1] != '/'
 #ifdef _WIN32
-		// windows files can't have quotes so no sanitation necessary
-		strcpy(copy_cmd, "copy \"");
-		strcat(copy_cmd, bak_fn);
-		strcat(copy_cmd, "\" \"");
-		strcat(copy_cmd, fn);
-		strcat(copy_cmd, "\"");
+		&& argv0[path_len-1] != '\\'
+#endif
+	) {
+		path_len--;
+	}
+	cmd_buf[path_len] = 0;
+	if (path_len > 0) {
+		strncpy(cmd_buf, argv0, path_len);
+	}
+	if (can_backup) {
+		strcat(cmd_buf, "upx -d -o ");
+		strcatfn(cmd_buf, fn);
+		strcat(cmd_buf, " ");
+		strcatfn(cmd_buf, bak_fn);
+	} else {
+		strcat(cmd_buf, "upx -d ");
+		strcatfn(cmd_buf, fn);
+	}
+	int res = system(cmd_buf);
+	if (res != 0) {
+		printf("UPX unpack failed (error code %i).", res);
+		if (can_backup && rename(bak_fn, fn) != 0) {
+			printf("Could not restore the original file (errno %i).\n", errno);
+			puts("Your game will have had .bak added to its filename, and no ");
+			puts("patches have been applied.");
+		} else {
+			puts("The backup has been restored and the game is unchanged.");
+		}
+		free(bak_fn);
+		free(cmd_buf);
+		CLOSE_PATCHER;
+	}
+	free(bak_fn);
+	free(cmd_buf);
+	// reopen
+	*fp = f = fopen(fn, "rb");
+	return true;
+}
+
+static void patch_exe(FILE *f, Patch patches[]) {
+	for (Patch *p = patches; p->pos != -1; p++) {
+		fseek(f, p->pos, SEEK_SET);
+		fputc(p->new, f);
+	}
+}
+
+int main(int argc, const char *argv[]) {
+	// check arguments
+	const char *fn = NULL;
+	bool valid_args = true;
+	if (argc == 2) {
+		fn = argv[1];
+	} else if (argc == 3) {
+		if (strcmp(argv[1], "-s") == 0) {
+			silent = true;
+			fn = argv[2];
+		} else {
+			valid_args = false;
+		}
+	} else {
+		valid_args = false;
+	}
+	// funny title
+	puts("Welcome to gm8x_fix v0.4!");
+	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
+	puts("---------------------------------------------------------------------------");
+	// compain about arguments if necessary
+	if (!valid_args) {
+		puts("Error: Invalid arguments.");
+		puts("Please drag your Game Maker game onto the patcher's executable file.");
+		puts("Or if you're a commandline nerd, run with this:");
+		puts(" gm8x_fix [-s] FILE");
+		puts("Add -s to remove commandline output.");
+		CLOSE_PATCHER;
+	}
+	printf("Inspecting file: %s\n\n", argv[1]);
+	FILE *f = fopen(fn, "rb");
+	if (f == NULL) {
+		printf("Could not open file (errno %i).\n", errno);
+		CLOSE_PATCHER;
+	}
+	if (fgetc(f) != 'M' || fgetc(f) != 'Z') {
+		fclose(f);
+		puts("This is not an executable file.");
+		CLOSE_PATCHER;
+	}
+	// de-upx if necessary
+	bool unpacked_upx = upx(&f, fn, argv[0]);
+	// identify patches
+	fseek(f, 0x116, SEEK_SET);
+	int mempatch = !(!(fgetc(f) & 0x0020))+1; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
+	int upx80 = can_patch(f, upx_80);
+	int joy80 = can_patch(f, joypatch_80);
+	int joy81 = can_patch(f, joypatch_81);
+	int dplay80 = can_patch(f, dplaypatch_80);
+	int dplay81 = can_patch(f, dplaypatch_81);
+	int sched80 = can_patch(f, schedpatch_80);
+	int sched80upx = can_patch(f, schedpatch_80upx);
+	int sched81 = can_patch(f, schedpatch_81);
+	// list patches
+	if (upx80 == 0) {
+		puts("Unpacked with UPX, but header offset doesn't match what we know. I haven't seen this before, please file an issue on the GitHub.");
+	}
+	if (mempatch == 2 || upx80 == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2 || sched80 == 2 || sched80upx == 2 || sched81 == 2) {
+		puts("Patches already applied:");
+		if (upx80 == 2) puts("* UPX unpacked header adjustment");
+		if (mempatch == 2) puts("* Memory patch");
+		if (joy80 == 2) puts("* GM8.0 joystick patch");
+		if (joy81 == 2) puts("* GM8.1 joystick patck");
+		if (dplay80 == 2) puts("* GM8.0 DirectPlay patch");
+		if (dplay81 == 2) puts("* GM8.1 DirectPlay patch");
+		if (sched80 == 2) puts("* GM8.0 scheduler patch");
+		if (sched80upx == 2) puts("* GM8.0 (UPX unpacked) scheduler patch");
+		if (sched81 == 2) puts("* GM8.1 scheduler patch");
+	}
+	if (mempatch == 1 || upx80 == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1 || sched80 == 1 || sched80upx == 1 || sched81 == 1) {
+		puts("Patches that can be applied:");
+		if (upx80 == 1) puts("* UPX unpacked header adjustment (required, I won't ask for confirmation)");
+		if (mempatch == 1) puts("* Memory patch");
+		if (joy80 == 1) puts("* GM8.0 joystick patch");
+		if (joy81 == 1) puts("* GM8.1 joystick patch");
+		if (dplay80 == 1) puts("* GM8.0 DirectPlay patch");
+		if (dplay81 == 1) puts("* GM8.1 DirectPlay patch");
+		if (sched80 == 1) puts("* GM8.0 scheduler patch (requires joystick patch)");
+		if (sched80upx == 1) puts("* GM8.0 (UPX unpacked) scheduler patch");
+		if (sched81 == 1) puts("* GM8.1 scheduler patch (requires joystick patch)");
+	} else {
+		puts("No new patches can be applied.");
+		fclose(f);
+		CLOSE_PATCHER;
+	}
+	// if we unpacked upx it's already backed up
+	if (!unpacked_upx) {
+		// make backup filename
+		char *bak_fn = malloc(strlen(fn) + 5);
+		strcpy(bak_fn, fn);
+		strcat(bak_fn, ".bak");
+		// ask for confirmation
+		printf("Will make a backup to %s\n", bak_fn);
+		printf("Press Enter to make a backup and choose patches to apply. ");
+		wait();
+		fclose(f); // i waited until here to close it so you can't mess with the file before confirming
+		bool can_backup = rename_for_backup(fn, bak_fn);
+		if (can_backup) {
+			// copy it to the original location
+			char *copy_cmd = malloc(strlen(bak_fn) * 4);
+#ifdef _WIN32
+			strcpy(copy_cmd, "copy ");
 #else
-		// unix files can have quotes so gotta sanitize
-		strcpy(copy_cmd, "cp \"");
-		char *copy_cmd_ptr = copy_cmd+4;
-		for (int i = 0; i < strlen(bak_fn); i++) {
-			if (bak_fn[i] != '"') {
-				*copy_cmd_ptr++ = bak_fn[i];
-			} else {
-				*copy_cmd_ptr++ = '\\';
-				*copy_cmd_ptr++ = '"';
-			}
-		}
-		*copy_cmd_ptr++ = '"';
-		*copy_cmd_ptr++ = ' ';
-		*copy_cmd_ptr++ = '"';
-		for (int i = 0; i < strlen(fn); i++) {
-			if (fn[i] != '"') {
-				*copy_cmd_ptr++ = fn[i];
-			} else {
-				*copy_cmd_ptr++ = '\\';
-				*copy_cmd_ptr++ = '"';
-			}
-		}
-		*copy_cmd_ptr++ = '"';
-		*copy_cmd_ptr++ = 0;
-	#endif
-		int res = system(copy_cmd);
-		if (res != 0) {
-			printf("File copy failed (error code %i).\n", res);
-			if (rename(bak_fn, fn) != 0) {
-				printf("Could not restore the original file (errno %i).\n", errno);
-				puts("Your game will have had .bak added to its filename, and no ");
-				puts("patches have been applied.");
-			} else {
-				puts("The backup has been restored and the game is unchanged.");
+			strcpy(copy_cmd, "cp ");
+#endif
+			strcatfn(copy_cmd, bak_fn);
+			strcat(copy_cmd, " ");
+			strcatfn(copy_cmd, fn);
+			int res = system(copy_cmd);
+			if (res != 0) {
+				printf("File copy failed (error code %i).\n", res);
+				if (rename(bak_fn, fn) != 0) {
+					printf("Could not restore the original file (errno %i).\n", errno);
+					puts("Your game will have had .bak added to its filename, and no ");
+					puts("patches have been applied.");
+				} else {
+					puts("The backup has been restored and the game is unchanged.");
+				}
+				free(bak_fn);
+				free(copy_cmd);
+				CLOSE_PATCHER;
 			}
 			free(bak_fn);
 			free(copy_cmd);
-			CLOSE_PATCHER;
+		} else {
+			puts("Not backing up.");
 		}
-		free(bak_fn);
-		free(copy_cmd);
-	} else {
-		puts("Not backing up.");
 	}
 	// apply the patches
 	f = fopen(fn, "rb+");
+	if (upx80 == 1)
+		patch_exe(f, upx_80);
 	if (mempatch == 1 && prompt("Apply memory patch? [y/n] ")) {
 		fseek(f, 0x116, SEEK_SET);
 		int c = fgetc(f);
@@ -268,11 +359,13 @@ int main(int argc, const char *argv[]) {
 		patch_exe(f, dplaypatch_80);
 	if (dplay81 == 1 && prompt("Apply GM8.1 DirectPlay patch? [y/n] "))
 		patch_exe(f, dplaypatch_81);
-	if ((sched80 == 1 || sched81 == 1) && !joy_patched) {
+	if ((sched80 == 1 || sched80upx == 1 || sched81 == 1) && !joy_patched) {
 		puts("It looks like the joystick patch wasn't applied. It's best to apply that if you're going to use the scheduler patch.");
 	}
 	if (sched80 == 1 && prompt("Apply GM8.0 scheduler patch? [y/n] "))
 		patch_exe(f, schedpatch_80);
+	if (sched80upx == 1 && prompt("Apply GM8.0 (UPX unpacked) scheduler patch? [y/n] "))
+		patch_exe(f, schedpatch_80upx);
 	if (sched81 == 1 && prompt("Apply GM8.1 scheduler patch? [y/n] "))
 		patch_exe(f, schedpatch_81);
 	fclose(f);
@@ -281,6 +374,12 @@ int main(int argc, const char *argv[]) {
 	wait();
 	return 0;
 }
+
+Patch upx_80[] = {
+	{0x144ac1, 0xa4, 0xf0},
+	{0x144ac2, 0x0a, 0x1c},
+	{-1,0,0}
+};
 
 Patch joypatch_80[] = {
 	{ 0x1399df, 0x53, 0xb8 },
@@ -624,6 +723,35 @@ Patch schedpatch_80[] = {
 	{0x191e8e, 0x73, 0x69},
 	{0x191e8f, 0x41, 0x6f},
 	{0x191e90, 0x00, 0x64},
+	{-1,0,0}
+};
+
+Patch schedpatch_80upx[] = {
+	{0x14461a, 0xb8, 0x6a},
+	{0x14461b, 0x2d, 0x01},
+	{0x14461c, 0x00, 0xe8},
+	{0x14461d, 0x00, 0x17},
+	{0x14461e, 0x00, 0xcf},
+	{0x14461f, 0xe8, 0xf3},
+	{0x144620, 0x18, 0xff},
+	{0x144621, 0xef, 0x90},
+	{0x144622, 0xff, 0x90},
+	{0x144623, 0xff, 0x90},
+	{0x191c4e, 0x6a, 0x74},
+	{0x191c4f, 0x6f, 0x69},
+	{0x191c50, 0x79, 0x6d},
+	{0x191c51, 0x47, 0x65},
+	{0x191c52, 0x65, 0x42},
+	{0x191c53, 0x74, 0x65},
+	{0x191c54, 0x44, 0x67},
+	{0x191c55, 0x65, 0x69},
+	{0x191c56, 0x76, 0x6e},
+	{0x191c57, 0x43, 0x50},
+	{0x191c58, 0x61, 0x65},
+	{0x191c59, 0x70, 0x72},
+	{0x191c5a, 0x73, 0x69},
+	{0x191c5b, 0x41, 0x6f},
+	{0x191c5c, 0x00, 0x64},
 	{-1,0,0}
 };
 

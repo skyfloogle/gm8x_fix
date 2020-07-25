@@ -65,9 +65,6 @@ literally nothing. This somehow doesn't break anything unless you're using the
 networking functions.
 
 # So what's the catch?
-The patcher currently does not work with games compressed using UPX. I plan on
-supporting this soon, so watch this space.
-
 If the game used the builtin joystick functions, it will no longer work with
 joysticks if you apply the joystick patch. Some games use an external library
 like [joydll](http://gmc.yoyogames.com/index.php?showtopic=495788)
