@@ -261,11 +261,18 @@ int main(int argc, const char *argv[]) {
 	int sched80 = can_patch(f, schedpatch_80);
 	int sched80upx = can_patch(f, schedpatch_80upx);
 	int sched81 = can_patch(f, schedpatch_81);
+	bool any_patch_applied = upx80 == 2 || joy80 == 2 || joy81 == 2 || sched80 == 2 || sched80upx == 2 || sched81 == 2;
+	bool can_apply_any = upx80 == 1 || joy80 == 1 || joy81 == 1 || sched80 == 1 || sched80upx == 1 || sched81 == 1;
 	// list patches
-	if (upx80 == 0) {
+	if (can_apply_any && upx80 == 0) {
 		puts("Unpacked with UPX, but header offset doesn't match what we know. I haven't seen this before, please file an issue on the GitHub.");
 	}
-	if (mempatch == 2 || upx80 == 2 || joy80 == 2 || joy81 == 2 || dplay80 == 2 || dplay81 == 2 || sched80 == 2 || sched80upx == 2 || sched81 == 2) {
+	if (!can_apply_any && !any_patch_applied) {
+		puts("This game cannot be patched. It may not be a GameMaker 8.0 or 8.1 game.");
+		fclose(f);
+		CLOSE_PATCHER;
+	}
+	if (any_patch_applied) {
 		puts("Patches already applied:");
 		if (upx80 == 2) puts("* UPX unpacked header adjustment");
 		if (mempatch == 2) puts("* Memory patch");
@@ -277,7 +284,7 @@ int main(int argc, const char *argv[]) {
 		if (sched80upx == 2) puts("* GM8.0 (UPX unpacked) scheduler patch");
 		if (sched81 == 2) puts("* GM8.1 scheduler patch");
 	}
-	if (mempatch == 1 || upx80 == 1 || joy80 == 1 || joy81 == 1 || dplay80 == 1 || dplay81 == 1 || sched80 == 1 || sched80upx == 1 || sched81 == 1) {
+	if (can_apply_any) {
 		puts("Patches that can be applied:");
 		if (upx80 == 1) puts("* UPX unpacked header adjustment (required, I won't ask for confirmation)");
 		if (mempatch == 1) puts("* Memory patch");
