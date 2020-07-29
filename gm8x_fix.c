@@ -264,13 +264,15 @@ int main(int argc, const char *argv[]) {
 	bool any_patch_applied = upx80 == 2 || joy80 == 2 || joy81 == 2 || sched80 == 2 || sched80upx == 2 || sched81 == 2;
 	bool can_apply_any = upx80 == 1 || joy80 == 1 || joy81 == 1 || sched80 == 1 || sched80upx == 1 || sched81 == 1;
 	// list patches
-	if (unpacked_upx && can_apply_any && upx80 == 0) {
-		puts("Unpacked with UPX, but header offset doesn't match what we know. I haven't seen this before, please file an issue on the GitHub.");
-	}
 	if (!can_apply_any && !any_patch_applied) {
 		puts("This game cannot be patched. It may not be a GameMaker 8.0 or 8.1 game.");
 		fclose(f);
 		CLOSE_PATCHER;
+	}
+	if (unpacked_upx && can_apply_any && upx80 == 0) {
+		puts("Unpacked with UPX, but header offset wasn't recognised. I haven't seen this before, please file an issue on the GitHub.");
+		puts("You can continue applying patches if you want by pressing enter.");
+		wait();
 	}
 	if (any_patch_applied) {
 		puts("Patches already applied:");
