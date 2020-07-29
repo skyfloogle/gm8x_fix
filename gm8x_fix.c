@@ -225,7 +225,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.4!");
+	puts("Welcome to gm8x_fix v0.4.1!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// compain about arguments if necessary
@@ -264,7 +264,7 @@ int main(int argc, const char *argv[]) {
 	bool any_patch_applied = upx80 == 2 || joy80 == 2 || joy81 == 2 || sched80 == 2 || sched80upx == 2 || sched81 == 2;
 	bool can_apply_any = upx80 == 1 || joy80 == 1 || joy81 == 1 || sched80 == 1 || sched80upx == 1 || sched81 == 1;
 	// list patches
-	if (can_apply_any && upx80 == 0) {
+	if (unpacked_upx && can_apply_any && upx80 == 0) {
 		puts("Unpacked with UPX, but header offset doesn't match what we know. I haven't seen this before, please file an issue on the GitHub.");
 	}
 	if (!can_apply_any && !any_patch_applied) {
