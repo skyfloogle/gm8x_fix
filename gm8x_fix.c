@@ -24,12 +24,15 @@ typedef struct Patch_t {
 
 Patch upx_80[];
 Patch joypatch_80[];
-Patch joypatch_81[];
+Patch joypatch_81_65[];
+Patch joypatch_81_141[];
 Patch dplaypatch_80[];
-Patch dplaypatch_81[];
+Patch dplaypatch_81_65[];
+Patch dplaypatch_81_141[];
 Patch schedpatch_80[];
 Patch schedpatch_80upx[];
-Patch schedpatch_81[];
+Patch schedpatch_81_65[];
+Patch schedpatch_81_141[];
 
 bool silent = false;
 
@@ -225,7 +228,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.4.1!");
+	puts("Welcome to gm8x_fix v0.4.2!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// compain about arguments if necessary
@@ -255,14 +258,17 @@ int main(int argc, const char *argv[]) {
 	int mempatch = !(!(fgetc(f) & 0x0020))+1; // IMAGE_FILE_LARGE_ADDRESS_AWARE flag
 	int upx80 = can_patch(f, upx_80);
 	int joy80 = can_patch(f, joypatch_80);
-	int joy81 = can_patch(f, joypatch_81);
+	int joy81_65 = can_patch(f, joypatch_81_65);
+	int joy81_141 = can_patch(f, joypatch_81_141);
 	int dplay80 = can_patch(f, dplaypatch_80);
-	int dplay81 = can_patch(f, dplaypatch_81);
+	int dplay81_65 = can_patch(f, dplaypatch_81_65);
+	int dplay81_141 = can_patch(f, dplaypatch_81_141);
 	int sched80 = can_patch(f, schedpatch_80);
 	int sched80upx = can_patch(f, schedpatch_80upx);
-	int sched81 = can_patch(f, schedpatch_81);
-	bool any_patch_applied = upx80 == 2 || joy80 == 2 || joy81 == 2 || sched80 == 2 || sched80upx == 2 || sched81 == 2;
-	bool can_apply_any = upx80 == 1 || joy80 == 1 || joy81 == 1 || sched80 == 1 || sched80upx == 1 || sched81 == 1;
+	int sched81_65 = can_patch(f, schedpatch_81_65);
+	int sched81_141 = can_patch(f, schedpatch_81_141);
+	bool any_patch_applied = upx80 == 2 || joy80 == 2 || joy81_65 == 2 || joy81_141 == 2 || sched80 == 2 || sched80upx == 2 || sched81_65 == 2 || sched81_141 == 2;
+	bool can_apply_any = upx80 == 1 || joy80 == 1 || joy81_65 == 1 || joy81_141 == 1 || sched80 == 1 || sched80upx == 1 || sched81_65 == 1 || sched81_141 == 1;
 	// list patches
 	if (!can_apply_any && !any_patch_applied) {
 		puts("This game cannot be patched. It may not be a GameMaker 8.0 or 8.1 game.");
@@ -279,24 +285,30 @@ int main(int argc, const char *argv[]) {
 		if (upx80 == 2) puts("* UPX unpacked header adjustment");
 		if (mempatch == 2) puts("* Memory patch");
 		if (joy80 == 2) puts("* GM8.0 joystick patch");
-		if (joy81 == 2) puts("* GM8.1 joystick patck");
+		if (joy81_65 == 2) puts("* GM8.1.65 joystick patch");
+		if (joy81_141 == 2) puts("* GM8.1.141 joystick patch");
 		if (dplay80 == 2) puts("* GM8.0 DirectPlay patch");
-		if (dplay81 == 2) puts("* GM8.1 DirectPlay patch");
+		if (dplay81_65 == 2) puts("* GM8.1.65 DirectPlay patch");
+		if (dplay81_141 == 2) puts("* GM8.1.141 DirectPlay patch");
 		if (sched80 == 2) puts("* GM8.0 scheduler patch");
 		if (sched80upx == 2) puts("* GM8.0 (UPX unpacked) scheduler patch");
-		if (sched81 == 2) puts("* GM8.1 scheduler patch");
+		if (sched81_65 == 2) puts("* GM8.1.65 scheduler patch");
+		if (sched81_141 == 2) puts("* GM8.1.141 scheduler patch");
 	}
 	if (can_apply_any) {
 		puts("Patches that can be applied:");
 		if (upx80 == 1) puts("* UPX unpacked header adjustment (required, I won't ask for confirmation)");
 		if (mempatch == 1) puts("* Memory patch");
 		if (joy80 == 1) puts("* GM8.0 joystick patch");
-		if (joy81 == 1) puts("* GM8.1 joystick patch");
+		if (joy81_65 == 1) puts("* GM8.1.65 joystick patch");
+		if (joy81_141 == 1) puts("* GM8.1.141 joystick patch");
 		if (dplay80 == 1) puts("* GM8.0 DirectPlay patch");
-		if (dplay81 == 1) puts("* GM8.1 DirectPlay patch");
+		if (dplay81_65 == 1) puts("* GM8.1.65 DirectPlay patch");
+		if (dplay81_141 == 1) puts("* GM8.1.141 DirectPlay patch");
 		if (sched80 == 1) puts("* GM8.0 scheduler patch (requires joystick patch)");
-		if (sched80upx == 1) puts("* GM8.0 (UPX unpacked) scheduler patch");
-		if (sched81 == 1) puts("* GM8.1 scheduler patch (requires joystick patch)");
+		if (sched80upx == 1) puts("* GM8.0 (UPX unpacked) scheduler patch (requires joystick patch)");
+		if (sched81_65 == 1) puts("* GM8.1.65 scheduler patch (requires joystick patch)");
+		if (sched81_141 == 1) puts("* GM8.1.141 scheduler patch (requires joystick patch)");
 	} else {
 		puts("No new patches can be applied.");
 		fclose(f);
@@ -355,28 +367,36 @@ int main(int argc, const char *argv[]) {
 		fseek(f, 0x116, SEEK_SET);
 		fputc(c | 0x0020, f);
 	}
-	bool joy_patched = (joy80 == 2 || joy81 == 2);
+	bool joy_patched = (joy80 == 2 || joy81_65 == 2 || joy81_141 == 2);
 	if (joy80 == 1 && prompt("Apply GM8.0 joystick patch? [y/n] ")) {
 		patch_exe(f, joypatch_80);
 		joy_patched = true;
 	}
-	if (joy81 == 1 && prompt("Apply GM8.1 joystick patch? [y/n] ")) {
-		patch_exe(f, joypatch_81);
+	if (joy81_65 == 1 && prompt("Apply GM8.1.65 joystick patch? [y/n] ")) {
+		patch_exe(f, joypatch_81_65);
+		joy_patched = true;
+	}
+	if (joy81_141 == 1 && prompt("Apply GM8.1.141 joystick patch? [y/n] ")) {
+		patch_exe(f, joypatch_81_141);
 		joy_patched = true;
 	}
 	if (dplay80 == 1 && prompt("Apply GM8.0 DirectPlay patch? [y/n] "))
 		patch_exe(f, dplaypatch_80);
-	if (dplay81 == 1 && prompt("Apply GM8.1 DirectPlay patch? [y/n] "))
-		patch_exe(f, dplaypatch_81);
-	if ((sched80 == 1 || sched80upx == 1 || sched81 == 1) && !joy_patched) {
+	if (dplay81_65 == 1 && prompt("Apply GM8.1.65 DirectPlay patch? [y/n] "))
+		patch_exe(f, dplaypatch_81_65);
+	if (dplay81_141 == 1 && prompt("Apply GM8.1.141 DirectPlay patch? [y/n] "))
+		patch_exe(f, dplaypatch_81_141);
+	if ((sched80 == 1 || sched80upx == 1 || sched81_65 == 1 || sched81_141 == 1) && !joy_patched) {
 		puts("It looks like the joystick patch wasn't applied. It's best to apply that if you're going to use the scheduler patch.");
 	}
 	if (sched80 == 1 && prompt("Apply GM8.0 scheduler patch? [y/n] "))
 		patch_exe(f, schedpatch_80);
 	if (sched80upx == 1 && prompt("Apply GM8.0 (UPX unpacked) scheduler patch? [y/n] "))
 		patch_exe(f, schedpatch_80upx);
-	if (sched81 == 1 && prompt("Apply GM8.1 scheduler patch? [y/n] "))
-		patch_exe(f, schedpatch_81);
+	if (sched81_65 == 1 && prompt("Apply GM8.1.65 scheduler patch? [y/n] "))
+		patch_exe(f, schedpatch_81_65);
+	if (sched81_141 == 1 && prompt("Apply GM8.1.141 scheduler patch? [y/n] "))
+		patch_exe(f, schedpatch_81_141);
 	fclose(f);
 	puts("All done!");
 	puts("Press Enter to close the patcher.");
@@ -543,7 +563,190 @@ Patch joypatch_80[] = {
 	{-1,0,0}
 };
 
-Patch joypatch_81[] = {
+Patch joypatch_81_65[] = {
+	{ 0x1cefb3, 0x53, 0xb8 },
+	{ 0x1cefb4, 0x6a, 0xa5 },
+	{ 0x1cefb6, 0xe8, 0x00 },
+	{ 0x1cefb7, 0x4d, 0x00 },
+	{ 0x1cefb8, 0xa2, 0x90 },
+	{ 0x1cefb9, 0xf3, 0x90 },
+	{ 0x1cefba, 0xff, 0x90 },
+	{ 0x1cf0b4, 0x53, 0xb8 },
+	{ 0x1cf0b5, 0x6a, 0xa5 },
+	{ 0x1cf0b6, 0x01, 0x00 },
+	{ 0x1cf0b7, 0xe8, 0x00 },
+	{ 0x1cf0b8, 0x4c, 0x00 },
+	{ 0x1cf0b9, 0xa1, 0x90 },
+	{ 0x1cf0ba, 0xf3, 0x90 },
+	{ 0x1cf0bb, 0xff, 0x90 },
+	{ 0x20a5ea, 0x8d, 0xb8 },
+	{ 0x20a5eb, 0x45, 0xa5 },
+	{ 0x20a5ec, 0xf0, 0x00 },
+	{ 0x20a5ed, 0x50, 0x00 },
+	{ 0x20a5ee, 0x53, 0x00 },
+	{ 0x20a5ef, 0xe8, 0x90 },
+	{ 0x20a5f0, 0x0c, 0x90 },
+	{ 0x20a5f1, 0xec, 0x90 },
+	{ 0x20a5f2, 0xef, 0x90 },
+	{ 0x20a5f3, 0xff, 0x90 },
+	{ 0x20a64a, 0x8d, 0xb8 },
+	{ 0x20a64b, 0x45, 0xa5 },
+	{ 0x20a64c, 0xf0, 0x00 },
+	{ 0x20a64d, 0x50, 0x00 },
+	{ 0x20a64e, 0x56, 0x00 },
+	{ 0x20a64f, 0xe8, 0x90 },
+	{ 0x20a650, 0xac, 0x90 },
+	{ 0x20a651, 0xeb, 0x90 },
+	{ 0x20a652, 0xef, 0x90 },
+	{ 0x20a653, 0xff, 0x90 },
+	{ 0x20a6e9, 0x68, 0xb8 },
+	{ 0x20a6ea, 0xd8, 0xa5 },
+	{ 0x20a6eb, 0x02, 0x00 },
+	{ 0x20a6ee, 0x8d, 0x90 },
+	{ 0x20a6ef, 0x85, 0x90 },
+	{ 0x20a6f0, 0x28, 0x90 },
+	{ 0x20a6f1, 0xfd, 0x90 },
+	{ 0x20a6f2, 0xff, 0x90 },
+	{ 0x20a6f3, 0xff, 0x90 },
+	{ 0x20a6f4, 0x50, 0x90 },
+	{ 0x20a6f5, 0x56, 0x90 },
+	{ 0x20a6f6, 0xe8, 0x90 },
+	{ 0x20a6f7, 0xfd, 0x90 },
+	{ 0x20a6f8, 0xea, 0x90 },
+	{ 0x20a6f9, 0xef, 0x90 },
+	{ 0x20a6fa, 0xff, 0x90 },
+	{ 0x20a755, 0x68, 0xb8 },
+	{ 0x20a756, 0xd8, 0xa5 },
+	{ 0x20a757, 0x02, 0x00 },
+	{ 0x20a75a, 0x8d, 0x90 },
+	{ 0x20a75b, 0x85, 0x90 },
+	{ 0x20a75c, 0x28, 0x90 },
+	{ 0x20a75d, 0xfd, 0x90 },
+	{ 0x20a75e, 0xff, 0x90 },
+	{ 0x20a75f, 0xff, 0x90 },
+	{ 0x20a760, 0x50, 0x90 },
+	{ 0x20a761, 0x56, 0x90 },
+	{ 0x20a762, 0xe8, 0x90 },
+	{ 0x20a763, 0x91, 0x90 },
+	{ 0x20a764, 0xea, 0x90 },
+	{ 0x20a765, 0xef, 0x90 },
+	{ 0x20a766, 0xff, 0x90 },
+	{ 0x20a7cd, 0x68, 0xb8 },
+	{ 0x20a7ce, 0xd8, 0xa5 },
+	{ 0x20a7cf, 0x02, 0x00 },
+	{ 0x20a7d2, 0x8d, 0x90 },
+	{ 0x20a7d3, 0x85, 0x90 },
+	{ 0x20a7d4, 0x28, 0x90 },
+	{ 0x20a7d5, 0xfd, 0x90 },
+	{ 0x20a7d6, 0xff, 0x90 },
+	{ 0x20a7d7, 0xff, 0x90 },
+	{ 0x20a7d8, 0x50, 0x90 },
+	{ 0x20a7d9, 0x56, 0x90 },
+	{ 0x20a7da, 0xe8, 0x90 },
+	{ 0x20a7db, 0x19, 0x90 },
+	{ 0x20a7dc, 0xea, 0x90 },
+	{ 0x20a7dd, 0xef, 0x90 },
+	{ 0x20a7de, 0xff, 0x90 },
+	{ 0x20a845, 0x68, 0xb8 },
+	{ 0x20a846, 0xd8, 0xa5 },
+	{ 0x20a847, 0x02, 0x00 },
+	{ 0x20a84a, 0x8d, 0x90 },
+	{ 0x20a84b, 0x85, 0x90 },
+	{ 0x20a84c, 0x28, 0x90 },
+	{ 0x20a84d, 0xfd, 0x90 },
+	{ 0x20a84e, 0xff, 0x90 },
+	{ 0x20a84f, 0xff, 0x90 },
+	{ 0x20a850, 0x50, 0x90 },
+	{ 0x20a851, 0x56, 0x90 },
+	{ 0x20a852, 0xe8, 0x90 },
+	{ 0x20a853, 0xa1, 0x90 },
+	{ 0x20a854, 0xe9, 0x90 },
+	{ 0x20a855, 0xef, 0x90 },
+	{ 0x20a856, 0xff, 0x90 },
+	{ 0x20a8c9, 0x8d, 0xb8 },
+	{ 0x20a8ca, 0x45, 0xa5 },
+	{ 0x20a8cb, 0xcc, 0x00 },
+	{ 0x20a8cc, 0x50, 0x00 },
+	{ 0x20a8cd, 0x56, 0x00 },
+	{ 0x20a8ce, 0xe8, 0x90 },
+	{ 0x20a8cf, 0x35, 0x90 },
+	{ 0x20a8d0, 0xe9, 0x90 },
+	{ 0x20a8d1, 0xef, 0x90 },
+	{ 0x20a8d2, 0xff, 0x90 },
+	{ 0x20ad30, 0x8d, 0xb8 },
+	{ 0x20ad31, 0x45, 0xa5 },
+	{ 0x20ad32, 0xcc, 0x00 },
+	{ 0x20ad33, 0x50, 0x00 },
+	{ 0x20ad34, 0x56, 0x00 },
+	{ 0x20ad35, 0xe8, 0x90 },
+	{ 0x20ad36, 0xce, 0x90 },
+	{ 0x20ad37, 0xe4, 0x90 },
+	{ 0x20ad38, 0xef, 0x90 },
+	{ 0x20ad39, 0xff, 0x90 },
+	{ 0x20adb0, 0x8d, 0xb8 },
+	{ 0x20adb1, 0x45, 0xa5 },
+	{ 0x20adb2, 0xcc, 0x00 },
+	{ 0x20adb3, 0x50, 0x00 },
+	{ 0x20adb4, 0x56, 0x00 },
+	{ 0x20adb5, 0xe8, 0x90 },
+	{ 0x20adb6, 0x4e, 0x90 },
+	{ 0x20adb7, 0xe4, 0x90 },
+	{ 0x20adb8, 0xef, 0x90 },
+	{ 0x20adb9, 0xff, 0x90 },
+	{ 0x20ae30, 0x8d, 0xb8 },
+	{ 0x20ae31, 0x45, 0xa5 },
+	{ 0x20ae32, 0xcc, 0x00 },
+	{ 0x20ae33, 0x50, 0x00 },
+	{ 0x20ae34, 0x56, 0x00 },
+	{ 0x20ae35, 0xe8, 0x90 },
+	{ 0x20ae36, 0xce, 0x90 },
+	{ 0x20ae37, 0xe3, 0x90 },
+	{ 0x20ae38, 0xef, 0x90 },
+	{ 0x20ae39, 0xff, 0x90 },
+	{ 0x20aeb0, 0x8d, 0xb8 },
+	{ 0x20aeb1, 0x45, 0xa5 },
+	{ 0x20aeb2, 0xcc, 0x00 },
+	{ 0x20aeb3, 0x50, 0x00 },
+	{ 0x20aeb4, 0x56, 0x00 },
+	{ 0x20aeb5, 0xe8, 0x90 },
+	{ 0x20aeb6, 0x4e, 0x90 },
+	{ 0x20aeb7, 0xe3, 0x90 },
+	{ 0x20aeb8, 0xef, 0x90 },
+	{ 0x20aeb9, 0xff, 0x90 },
+	{ 0x20af30, 0x8d, 0xb8 },
+	{ 0x20af31, 0x45, 0xa5 },
+	{ 0x20af32, 0xcc, 0x00 },
+	{ 0x20af33, 0x50, 0x00 },
+	{ 0x20af34, 0x56, 0x00 },
+	{ 0x20af35, 0xe8, 0x90 },
+	{ 0x20af36, 0xce, 0x90 },
+	{ 0x20af37, 0xe2, 0x90 },
+	{ 0x20af38, 0xef, 0x90 },
+	{ 0x20af39, 0xff, 0x90 },
+	{ 0x20afb0, 0x8d, 0xb8 },
+	{ 0x20afb1, 0x45, 0xa5 },
+	{ 0x20afb2, 0xcc, 0x00 },
+	{ 0x20afb3, 0x50, 0x00 },
+	{ 0x20afb4, 0x56, 0x00 },
+	{ 0x20afb5, 0xe8, 0x90 },
+	{ 0x20afb6, 0x4e, 0x90 },
+	{ 0x20afb7, 0xe2, 0x90 },
+	{ 0x20afb8, 0xef, 0x90 },
+	{ 0x20afb9, 0xff, 0x90 },
+	{ 0x20b034, 0x8d, 0xb8 },
+	{ 0x20b035, 0x45, 0xa5 },
+	{ 0x20b036, 0xcc, 0x00 },
+	{ 0x20b037, 0x50, 0x00 },
+	{ 0x20b038, 0x56, 0x00 },
+	{ 0x20b039, 0xe8, 0x90 },
+	{ 0x20b03a, 0xca, 0x90 },
+	{ 0x20b03b, 0xe1, 0x90 },
+	{ 0x20b03c, 0xef, 0x90 },
+	{ 0x20b03d, 0xff, 0x90 },
+	{-1,0,0}
+};
+
+Patch joypatch_81_141[] = {
 	{ 0x1f6ce7, 0x53, 0xb8 },
 	{ 0x1f6ce8, 0x6a, 0xa5 },
 	{ 0x1f6cea, 0xe8, 0x0 },
@@ -701,7 +904,12 @@ Patch dplaypatch_80[] = {
 	{-1,0,0}
 };
 
-Patch dplaypatch_81[] = {
+Patch dplaypatch_81_65[] = {
+	{ 0x23d184, 'D', 0 },
+	{-1,0,0}
+};
+
+Patch dplaypatch_81_141[] = {
 	{ 0x279c10, 'D', 0 },
 	{-1,0,0}
 };
@@ -764,7 +972,36 @@ Patch schedpatch_80upx[] = {
 	{-1,0,0}
 };
 
-Patch schedpatch_81[] = {
+Patch schedpatch_81_65[] = {
+	{ 0x1e3fd6, 0xb8, 0x6a },
+	{ 0x1e3fd7, 0x2d, 0x01 },
+	{ 0x1e3fd8, 0x00, 0xe8 },
+	{ 0x1e3fd9, 0x00, 0x1b },
+	{ 0x1e3fda, 0x00, 0x52 },
+	{ 0x1e3fdb, 0xe8, 0xf2 },
+	{ 0x1e3fdc, 0x98, 0xff },
+	{ 0x1e3fdd, 0xe7, 0x90 },
+	{ 0x1e3fde, 0xff, 0x90 },
+	{ 0x1e3fdf, 0xff, 0x90 },
+	{ 0x24cb5e, 0x6a, 0x74 },
+	{ 0x24cb5f, 0x6f, 0x69 },
+	{ 0x24cb60, 0x79, 0x6d },
+	{ 0x24cb61, 0x47, 0x65 },
+	{ 0x24cb62, 0x65, 0x42 },
+	{ 0x24cb63, 0x74, 0x65 },
+	{ 0x24cb64, 0x44, 0x67 },
+	{ 0x24cb65, 0x65, 0x69 },
+	{ 0x24cb66, 0x76, 0x6e },
+	{ 0x24cb67, 0x43, 0x50 },
+	{ 0x24cb68, 0x61, 0x65 },
+	{ 0x24cb69, 0x70, 0x72 },
+	{ 0x24cb6a, 0x73, 0x69 },
+	{ 0x24cb6b, 0x57, 0x6f },
+	{ 0x24cb6c, 0x00, 0x64 },
+		{-1,0,0}
+};
+
+Patch schedpatch_81_141[] = {
 	{0x279f23, 0xb8, 0x6a},
 	{0x279f24, 0x20, 0x01},
 	{0x279f25, 0xb1, 0xe8},
