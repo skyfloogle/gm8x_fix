@@ -22,6 +22,8 @@ typedef struct Patch_t {
 	int new;
 } Patch;
 
+// when i first wrote this it had like 3 patches and i didn't think i'd keep adding more
+// maybe one of these days i'll rewrite this to be more modular
 Patch upx_80[];
 Patch joypatch_80[];
 Patch joypatch_81_65[];
@@ -228,7 +230,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.4.2!");
+	puts("Welcome to gm8x_fix v0.4.3!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// compain about arguments if necessary
