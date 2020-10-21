@@ -67,7 +67,7 @@ networking functions.
 # So what's the catch?
 If the game used the builtin joystick functions, it will no longer work with
 joysticks if you apply the joystick patch. Some games use an external library
-like [joydll](http://gmc.yoyogames.com/index.php?showtopic=495788)
+like [joydll](http://web.archive.org/web/20191214124845/https://gmc.yoyogames.com/index.php?showtopic=495788)
 for joystick support. Those will work fine.
 
 The DirectPlay patch will break networking. Any calls to the networking
