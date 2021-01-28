@@ -7,15 +7,36 @@ GameMaker 8.x. You can download the latest release from the
 Drag the executable file for your game onto gm8x_fix.exe. Or, if you're a
 commandline nerd, you can run it with:
 ```bash
-gm8x_fix [-s] FILE
+gm8x_fix [options] FILE
 ```
-The -s option removes commandline output. It will still exit with code 1 on
-failure though, so check for that if you're automating.
+Available options include:
+- `-s` Remove commandline output and apply any available patches.
+- `-nb` Disable the automatic backup. Please back up manually if you use this.
+- `-ni` Don't offer input lag patch.
+- `-nj` Don't offer joystick patch.
+- `-ns` Don't offer scheduler patch.
+- `-nm` Don't offer memory patch.
+- `-nd` Don't offer DirectPlay patch.
+If you're automating patching, take note that the program will exit with code
+1 on failure.
 
 For building, you can just build the C file with your favourite compiler, it
 doesn't have any dependencies.
 
+gm8x_fix currently supports games made in the following versions of GameMaker:
+- 8.0
+- 8.1.65
+- 8.1.140
+- 8.1.141
+
 # The issues this fixes, and how it fixes them
+## The input lag patch
+When running a game, GameMaker 8 runs the game code, waits for the next frame
+to start, and *then* puts the image on the screen. This adds a frame of input
+lag. Studio and later swap the waiting and putting the image on the screen.
+The input lag patch changes it to act more like Studio: run the game code, then
+put the frame on the screen **immediately** before waiting for the next frame.
+
 ## The joystick patch
 Early versions of GameMaker have a *terrible* implementation of joystick
 support, which can cause games to slow down if joysticks are installed but not
@@ -70,10 +91,10 @@ joysticks if you apply the joystick patch. Some games use an external library
 like [joydll](http://web.archive.org/web/20191214124845/https://gmc.yoyogames.com/index.php?showtopic=495788)
 for joystick support. Those will work fine.
 
-The DirectPlay patch will break networking. Any calls to the networking
-functions will probably trigger an access violation. If this causes problems
-outside of multiplayer modes in any games, open an issue and I'll make a less
-janky solution.
-
 The scheduler patch overwrites some debug logging, but that shouldn't cause any
 issues.
+
+The DirectPlay patch will break GameMaker's built-in networking. Any calls to
+the networking functions will probably trigger an access violation. If this
+causes problems outside of multiplayer modes in any games, open an issue and
+I'll make a less janky solution.
