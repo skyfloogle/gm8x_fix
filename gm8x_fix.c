@@ -166,7 +166,7 @@ static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) 
 		// ask for confirmation
 		printf("Will make a backup to %s\n", bak_fn);
 		puts("Looks like your game was packed with UPX. We need to unpack it first.");
-		puts("Please download the latest release of UPX from https://github.com/upx/upx/releases/tag/v3.96");
+		puts("Please download the latest release of UPX from https://github.com/upx/upx/releases/latest");
 		puts("and put upx.exe in the same directory as gm8x_fix.exe, then press Enter to unpack.");
 		wait();
 		// rename original
@@ -174,7 +174,7 @@ static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) 
 		can_backup = rename_for_backup(fn, bak_fn);
 	} else {
 		puts("Looks like your game was packed with UPX. We need to unpack it first.");
-		puts("Please download the latest release of UPX from https://github.com/upx/upx/releases/tag/v3.96");
+		puts("Please download the latest release of UPX from https://github.com/upx/upx/releases/latest");
 		puts("and put upx.exe in the same directory as gm8x_fix.exe, then press Enter to unpack.");
 		puts("NOTE: Making a backup is HIGHLY RECOMMENDED for UPX games!");
 	}
