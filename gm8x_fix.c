@@ -177,9 +177,11 @@ static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) 
 		puts("Please download the latest release of UPX from https://github.com/upx/upx/releases/latest");
 		puts("and put upx.exe in the same directory as gm8x_fix.exe, then press Enter to unpack.");
 		puts("NOTE: Making a backup is HIGHLY RECOMMENDED for UPX games!");
+		wait();
+		fclose(f);
 	}
 	// get upx path
-	char *cmd_buf = malloc(strlen(bak_fn) * 4 + strlen(argv0));
+	char *cmd_buf = malloc((strlen(fn) + 5) * 4 + strlen(argv0));
 	int path_len = strlen(argv0);
 	while (path_len > 0 && argv0[path_len-1] != '/'
 #ifdef _WIN32
