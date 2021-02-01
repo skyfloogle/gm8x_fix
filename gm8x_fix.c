@@ -278,7 +278,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.0!");
+	puts("Welcome to gm8x_fix v0.5.1!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	if (!offer_joystick && !offer_memory && !offer_dplay && !offer_scheduler && !offer_input_lag) {
