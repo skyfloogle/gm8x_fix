@@ -89,6 +89,7 @@ networking functions.
 If the game used the builtin joystick functions, it will no longer work with
 joysticks if you apply the joystick patch. Some games use an external library
 like [joydll](http://web.archive.org/web/20191214124845/https://gmc.yoyogames.com/index.php?showtopic=495788)
+or the newer [gm82joy](https://github.com/omicronrex/gm82joy)
 for joystick support. Those will work fine.
 
 The scheduler patch overwrites some debug logging, but that shouldn't cause any
