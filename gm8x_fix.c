@@ -181,7 +181,11 @@ static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) 
 		fclose(f);
 	}
 	// get upx path
-	char *cmd_buf = malloc((strlen(fn) + 5) * 4 + strlen(argv0));
+	char *cmd_buf = calloc((strlen(fn) + 5) * 4 + strlen(argv0), 1);
+	// wrap entire thing in quotes on windows because system() on windows is `funky`
+#ifdef _WIN32
+	cmd_buf[0] = '"';
+#endif
 	int path_len = strlen(argv0);
 	while (path_len > 0 && argv0[path_len-1] != '/'
 #ifdef _WIN32
@@ -190,12 +194,15 @@ static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) 
 	) {
 		path_len--;
 	}
-	cmd_buf[path_len] = 0;
 	if (path_len > 0) {
-		strncpy(cmd_buf, argv0, path_len);
+		strcatfn(cmd_buf, argv0);
 	}
+	cmd_buf[path_len+2] = 0;
+#ifndef _WIN32
+	cmd_buf[path_len+1] = 0;
+#endif
 	if (can_backup) {
-		strcat(cmd_buf, "upx -d -o ");
+		strcat(cmd_buf, "upx\" -d -o ");
 		strcatfn(cmd_buf, fn);
 		strcat(cmd_buf, " ");
 		strcatfn(cmd_buf, bak_fn);
@@ -203,6 +210,9 @@ static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) 
 		strcat(cmd_buf, "upx -d ");
 		strcatfn(cmd_buf, fn);
 	}
+#ifdef _WIN32
+	strcat(cmd_buf, "\"");
+#endif
 	int res = system(cmd_buf);
 	if (res != 0) {
 		printf("UPX unpack failed (error code %i).", res);
@@ -278,7 +288,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.1!");
+	puts("Welcome to gm8x_fix v0.5.2!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	if (!offer_joystick && !offer_memory && !offer_dplay && !offer_scheduler && !offer_input_lag) {
