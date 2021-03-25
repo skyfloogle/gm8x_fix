@@ -448,7 +448,7 @@ int main(int argc, const char *argv[]) {
 				if (patch->type == SCHED && !joy_patched) {
 					puts("It looks like the joystick patch wasn't applied. It's best to apply that if you're going to use the scheduler patch.");
 				}
-				printf("Apply %s patch? [y/n] ", patch->name);
+				printf("Apply %s? [y/n] ", patch->name);
 				able = prompt("");
 			}
 			if (able) {
