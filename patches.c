@@ -1,15 +1,24 @@
 #include "patch_types.h"
 
+// Memory patch: literally just turn on the IMAGE_FILE_LARGE_ADDRESS_AWARE flag
 PatchByte mempatch[] = {
 	{0x116, 0x8e, 0xae},
 	{-1,0,0}
 };
 
+
+// UPX fix
+// Fixes the file offset GM8 tries to load game data at in de-UPX'd games
 PatchByte upx_80[] = {
 	{0x144ac1, 0xa4, 0xf0},
 	{0x144ac2, 0x0a, 0x1c},
 	{-1,0,0}
 };
+
+// JOYSTICK PATCHES
+// How to create:
+// 1. Find all calls to joystick functions (joyGetPos, joyGetPosEx, joyGetDevCapsW)
+// 2. Replace with "mov eax, 0xa5" to emulate joystick being unplugged
 
 PatchByte joypatch_80[] = {
 	{ 0x1399df, 0x53, 0xb8 },
@@ -617,6 +626,11 @@ PatchByte joypatch_81_141[] = {
 	{-1,0,0}
 };
 
+// DPLAY PATCHES
+// How to create:
+// 1. Find L"DPlayX.dll"
+// 2. Replace the 'D' with a null byte
+
 PatchByte dplaypatch_80[] = {
 	{ 0x187380, 'D', 0 },
 	{ 0x187381, 'P', 'P' },
@@ -656,6 +670,11 @@ PatchByte dplaypatch_81_141[] = {
 	{ 0x279c1a, 'X', 'X' },
 	{-1,0,0}
 };
+
+// SCHEDULER PATCHES
+// How to create:
+// 1. replace "joyGetDevCapsW" (or A, for 8.0) with "timeBeginPeriod"
+// 2. call the JMP wrapper for timeBeginPeriod instead of writing "Loading help..."
 
 PatchByte schedpatch_80[] = {
 	{0x14461a, 0xb8, 0x6a},
@@ -801,6 +820,12 @@ PatchByte schedpatch_81_141[] = {
 	{0x28be96, 0x0, 'd'},
 	{-1,0,0}
 };
+
+// INPUT LAG PATCHES
+// How to create:
+// 1. Find where the timing code and screen presenting is done
+// 2. Swap timing with presenting
+// 3. Fix call instructions
 
 PatchByte inputlagpatch_80[] = {
 	{ 0x13dcbd, 0xe8, 0xff },
