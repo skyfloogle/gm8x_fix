@@ -69,7 +69,6 @@ static PatchState can_patch(FILE *f, PatchByte patches[]) {
 		}
 	}
 	if (patched){
-		puts(" done");
 		return DONE;
 	}
 	if (unpatched) {
