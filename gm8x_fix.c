@@ -34,6 +34,11 @@ Patch patches[] = {
 	{.bytes = schedpatch_81_65, .name = "GM8.1.65 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_65, .name = "GM8.1.65 input lag patch", .type = INPUTLAG},
 
+	{.bytes = joypatch_81_71, .name = "GM8.1.71 joystick patch", .type = JOY},
+	{.bytes = dplaypatch_81_71, .name = "GM8.1.71 DirectPlay patch", .type = DPLAY},
+	{.bytes = schedpatch_81_71, .name = "GM8.1.71 scheduler patch", .type = SCHED},
+	{.bytes = inputlagpatch_81_71, .name = "GM8.1.71 input lag patch", .type = INPUTLAG},
+
 	{.bytes = joypatch_81_135, .name = "GM8.1.135 joystick patch", .type = JOY},
 	{.bytes = dplaypatch_81_135, .name = "GM8.1.135 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_135, .name = "GM8.1.135 scheduler patch", .type = SCHED},
@@ -294,7 +299,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.3!");
+	puts("Welcome to gm8x_fix v0.5.4!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything
