@@ -17,6 +17,7 @@ Available options include:
 - `-ns` Don't offer scheduler patch.
 - `-nm` Don't offer memory patch.
 - `-nd` Don't offer DirectPlay patch.
+
 If you're automating patching, take note that the program will exit with code
 1 on failure.
 
