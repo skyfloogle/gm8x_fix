@@ -53,6 +53,9 @@ Patch patches[] = {
 	{.bytes = dplaypatch_81_141, .name = "GM8.1.141 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_141, .name = "GM8.1.141 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_141, .name = "GM8.1.141 input lag patch", .type = INPUTLAG},
+	
+	{.bytes = resetpatch_81_141, .name = "GM8.1.141 display reset patch", .type = RESET},
+	
 	{.bytes = NULL},
 };
 
@@ -288,6 +291,8 @@ int main(int argc, const char *argv[]) {
 				disable_patches[SCHED] = true;
 			} else if (strcmp(argv[i], "-ni") == 0) {
 				disable_patches[INPUTLAG] = true;
+			} else if (strcmp(argv[i], "-nr") == 0) {
+				disable_patches[RESET] = true;
 			} else if (fn == NULL) {
 				// yeah i don't feel like figuring out something better
 				fn = argv[i];
@@ -299,7 +304,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.4!");
+	puts("Welcome to gm8x_fix v0.5.5!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything

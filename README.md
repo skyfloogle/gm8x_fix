@@ -80,6 +80,14 @@ the OS the program can understand addresses bigger than 2GB. Shoutouts to
 [these guys](https://iwannacommunity.com/forum/index.php@topic=2308.msg16505.html)
 for finding that.
 
+## The display reset patch
+In all GameMaker 8.1.141 games, when the game loses its Direct3D handle (for
+example, through the computer being locked), without any surfaces having been
+created, the game will lock up. This patch makes it behave the same as if you
+had created and deleted a surface: it will try to get a new handle, then if
+that fails, wait for five seconds and try again, and if that fails it will
+close. This issue only affects specifically 8.1.141.
+
 ## The DirectPlay patch
 GameMaker games use DirectPlay for networking, but loading the DirectPlay DLL
 on newer versions of Windows brings up a prompt because DirectPlay is

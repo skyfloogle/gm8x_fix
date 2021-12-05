@@ -16,6 +16,7 @@ typedef enum {
 	DPLAY,
 	SCHED,
 	INPUTLAG,
+	RESET,
 	TYPE_COUNT,
 } PatchType;
 
