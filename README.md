@@ -98,6 +98,9 @@ for joystick support. Those will work fine.
 The scheduler patch overwrites some debug logging, but that shouldn't cause any
 issues.
 
+I've heard reports of the input lag patch making the framepacing less
+consistent. See how it feels, and decide for yourself which you prefer.
+
 The DirectPlay patch will break GameMaker's built-in networking. Any calls to
 the networking functions will probably trigger an access violation. If this
 causes problems outside of multiplayer modes in any games, open an issue and
