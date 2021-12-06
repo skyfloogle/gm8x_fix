@@ -333,6 +333,7 @@ int main(int argc, const char *argv[]) {
 		puts(" -ni  Don't offer input lag patch.");
 		puts(" -nj  Don't offer joystick patch.");
 		puts(" -ns  Don't offer scheduler patch.");
+		puts(" -nr  Don't offer display reset patch.\n");
 		puts(" -nm  Don't offer memory patch.");
 		puts(" -nd  Don't offer DirectPlay patch.\n");
 		CLOSE_PATCHER;
