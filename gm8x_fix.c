@@ -24,37 +24,36 @@ Patch patches[] = {
 	{.bytes = mempatch, .name = "Memory patch", .type = MEM},
 
 	{.bytes = joypatch_80, .name = "GM8.0 joystick patch", .type = JOY},
-	{.bytes = dplaypatch_80, .name = "GM8.0 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_80, .name = "GM8.0 scheduler patch", .type = SCHED},
 	{.bytes = schedpatch_80upx, .name = "GM8.0 (UPX unpacked) scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_80, .name = "GM8.0 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_80, .name = "GM8.0 DirectPlay patch", .type = DPLAY},
 
 	{.bytes = joypatch_81_65, .name = "GM8.1.65 joystick patch", .type = JOY},
-	{.bytes = dplaypatch_81_65, .name = "GM8.1.65 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_65, .name = "GM8.1.65 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_65, .name = "GM8.1.65 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_81_65, .name = "GM8.1.65 DirectPlay patch", .type = DPLAY},
 
 	{.bytes = joypatch_81_71, .name = "GM8.1.71 joystick patch", .type = JOY},
-	{.bytes = dplaypatch_81_71, .name = "GM8.1.71 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_71, .name = "GM8.1.71 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_71, .name = "GM8.1.71 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_81_71, .name = "GM8.1.71 DirectPlay patch", .type = DPLAY},
 
 	{.bytes = joypatch_81_135, .name = "GM8.1.135 joystick patch", .type = JOY},
-	{.bytes = dplaypatch_81_135, .name = "GM8.1.135 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_135, .name = "GM8.1.135 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_135, .name = "GM8.1.135 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_81_135, .name = "GM8.1.135 DirectPlay patch", .type = DPLAY},
 
 	{.bytes = joypatch_81_140, .name = "GM8.1.140 joystick patch", .type = JOY},
-	{.bytes = dplaypatch_81_140, .name = "GM8.1.140 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_140, .name = "GM8.1.140 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_140, .name = "GM8.1.140 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_81_140, .name = "GM8.1.140 DirectPlay patch", .type = DPLAY},
 
 	{.bytes = joypatch_81_141, .name = "GM8.1.141 joystick patch", .type = JOY},
-	{.bytes = dplaypatch_81_141, .name = "GM8.1.141 DirectPlay patch", .type = DPLAY},
 	{.bytes = schedpatch_81_141, .name = "GM8.1.141 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_141, .name = "GM8.1.141 input lag patch", .type = INPUTLAG},
-	
 	{.bytes = resetpatch_81_141, .name = "GM8.1.141 display reset patch", .type = RESET},
+	{.bytes = dplaypatch_81_141, .name = "GM8.1.141 DirectPlay patch", .type = DPLAY},
 	
 	{.bytes = NULL},
 };
