@@ -1,6 +1,6 @@
 # gm8x_fix
 gm8x_fix is a patcher that fixes certain issues in games made with
-GameMaker 8.x. You can download the latest release from the
+GameMaker 7.0, 8.0, and 8.1. You can download the latest release from the
 [Releases](https://github.com/skyfloogle/gm8x_fix/releases/latest) tab.
 
 # How do I use it?
@@ -25,6 +25,7 @@ For building, you can just build the C file with your favourite compiler, it
 doesn't have any dependencies.
 
 gm8x_fix currently supports games made in the following versions of GameMaker:
+- 7.0
 - 8.0
 - 8.1.65
 - 8.1.71

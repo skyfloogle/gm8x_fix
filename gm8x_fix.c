@@ -23,6 +23,11 @@ Patch patches[] = {
 	{.bytes = upx_80, .name = "UPX unpacked header adjustment", .type = UPX},
 	{.bytes = mempatch, .name = "Memory patch", .type = MEM},
 
+	{.bytes = joypatch_70, .name = "GM7.0 joystick patch", .type = JOY},
+	{.bytes = schedpatch_70, .name = "GM7.0 scheduler patch", .type = SCHED},
+	{.bytes = inputlagpatch_70, .name = "GM7.0 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_70, .name = "GM7.0 DirectPlay patch", .type = DPLAY},
+
 	{.bytes = joypatch_80, .name = "GM8.0 joystick patch", .type = JOY},
 	{.bytes = schedpatch_80, .name = "GM8.0 scheduler patch", .type = SCHED},
 	{.bytes = schedpatch_80upx, .name = "GM8.0 (UPX unpacked) scheduler patch", .type = SCHED},
@@ -374,7 +379,7 @@ int main(int argc, const char *argv[]) {
 
 	// list patches
 	if (!can_apply_any && !any_patch_applied) {
-		puts("This game cannot be patched. It may not be a GameMaker 8.0 or 8.1 game.");
+		puts("This game cannot be patched. It may not be a GameMaker 7.0, 8.0, or 8.1 game.");
 		fclose(f);
 		CLOSE_PATCHER;
 	}
