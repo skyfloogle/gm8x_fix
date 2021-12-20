@@ -162,16 +162,17 @@ static bool rename_for_backup(const char *fn, const char *bak_fn) {
 // de-upx if necessary, return true if unpacked
 static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) {
 	FILE *f = *fp;
-	// identify UPX headers
-	fseek(f, 0x170, SEEK_SET);
-	const char head1[] = {0x55, 0x50, 0x58, 0x30, 0, 0, 0, 0};
+	// identify UPX0 header
+	fseek(f, 0x3c, SEEK_SET);
+	int pe_pointer;
+	fread(&pe_pointer, 4, 1, f);
+	fseek(f, pe_pointer + 0x14, SEEK_SET);
+	short opt_len;
+	fread(&opt_len, 2, 1, f);
+	fseek(f, opt_len + 2, SEEK_CUR);
+	const char head1[] = "UPX0\0\0\0"; // 4th null is implicit
 	for (int i = 0; i < 8; i++) {
 		if (fgetc(f) != head1[i]) return false;
-	}
-	fseek(f, 0x198, SEEK_SET);
-	const char head2[] = {0x55, 0x50, 0x58, 0x31, 0, 0, 0, 0};
-	for (int i = 0; i < 8; i++) {
-		if (fgetc(f) != head2[i]) return false;
 	}
 	char *bak_fn = NULL;
 	bool can_backup = false;
