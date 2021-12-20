@@ -303,7 +303,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.5!");
+	puts("Welcome to gm8x_fix v0.5.6!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything

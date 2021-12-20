@@ -18,7 +18,7 @@ PatchByte upx_80[] = {
 // JOYSTICK PATCHES
 // How to create:
 // 1. Find all calls to joystick functions (joyGetPos, joyGetPosEx, joyGetDevCapsW)
-// 2. Replace with "mov eax, 0xa5" to emulate joystick being unplugged
+// 2. Replace with nops and "mov eax, 0xa5" to emulate joystick being unplugged
 
 PatchByte joypatch_80[] = {
 	{ 0x1399df, 0x53, 0xb8 },
@@ -928,7 +928,7 @@ PatchByte dplaypatch_81_141[] = {
 // SCHEDULER PATCHES
 // How to create:
 // 1. replace "joyGetDevCapsW" (or A, for 8.0) with "timeBeginPeriod"
-// 2. call the JMP wrapper for timeBeginPeriod instead of writing "Loading help..."
+// 2. call the JMP wrapper for timeBeginPeriod instead of writing "Loading help"
 
 PatchByte schedpatch_80[] = {
 	{0x14461a, 0xb8, 0x6a},
@@ -3680,6 +3680,13 @@ PatchByte inputlagpatch_81_141[] = {
 	{ 0x206ecc, 0x0, 0xdc },
 	{-1,0,0}
 };
+
+// DISPLAY RESET PATCH
+// How to create:
+// 1. Find the code for reinitializing Direct3D (search via f.ex. d3d_set_culling)
+// 2. Find the "while old depth buffer list length > 0" block
+// 3. Make it a do-while and add a null check on the condition
+// Note: This is only relevant for 8.1.141, even 8.1.140 isn't affected by this bug.
 
 PatchByte resetpatch_81_141[] = {
 	{ 0x21ee8d, 0xeb, 0xe8 },

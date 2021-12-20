@@ -2,11 +2,12 @@
 #define PATCH_TYPES_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct {
 	int pos;
-	int orig_byte;
-	int new_byte;
+	uint8_t orig_byte;
+	uint8_t new_byte;
 } PatchByte;
 
 typedef enum {
