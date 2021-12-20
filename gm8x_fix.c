@@ -162,17 +162,26 @@ static bool rename_for_backup(const char *fn, const char *bak_fn) {
 // de-upx if necessary, return true if unpacked
 static bool upx(FILE **fp, const char *fn, const char *argv0, bool make_backup) {
 	FILE *f = *fp;
-	// identify UPX headers
-	fseek(f, 0x170, SEEK_SET);
-	const char head1[] = {0x55, 0x50, 0x58, 0x30, 0, 0, 0, 0};
-	for (int i = 0; i < 8; i++) {
-		if (fgetc(f) != head1[i]) return false;
-	}
-	fseek(f, 0x198, SEEK_SET);
-	const char head2[] = {0x55, 0x50, 0x58, 0x31, 0, 0, 0, 0};
-	for (int i = 0; i < 8; i++) {
-		if (fgetc(f) != head2[i]) return false;
-	}
+	
+    // search for UPX header in the first 1024 bytes
+    bool packed = false;
+	fseek(f, 0, SEEK_SET);
+    for (int i = 0; i < 1024; i++) {
+        if (fgetc(f) == 'U')
+        if (fgetc(f) == 'P')
+        if (fgetc(f) == 'X') {
+            char c = fgetc(f);
+            if (c == '0' || c == '1' || c == '!') {
+                // we've found either UPX0, UPX1 or UPX! sig so this is packed
+                packed = true;
+                break;
+            }
+        }
+    }
+    
+    // exit if not packed with upx
+    if (!packed) return 0;
+    
 	char *bak_fn = NULL;
 	bool can_backup = false;
 	if (make_backup) {
@@ -303,7 +312,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.5!");
+	puts("Welcome to gm8x_fix v0.5.6!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything
