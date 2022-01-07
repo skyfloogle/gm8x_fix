@@ -60,6 +60,9 @@ Patch patches[] = {
 	{.bytes = resetpatch_81_141, .name = "GM8.1.141 display reset patch", .type = RESET},
 	{.bytes = dplaypatch_81_141, .name = "GM8.1.141 DirectPlay patch", .type = DPLAY},
 	
+	// the wall of shame
+	{.bytes = resetpatch_fix_81_141, .name = "gm8x_fix 5.5.5-5.5.6 bugfix", .type = BUGFIX},
+	
 	{.bytes = NULL},
 };
 
@@ -309,13 +312,13 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.6!");
+	puts("Welcome to gm8x_fix v0.5.7!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything
 	bool all_disabled = true;
 	for (int i = 0; i < TYPE_COUNT; i++) {
-		if (i != UPX && !disable_patches[i]) {
+		if (i != UPX && i != BUGFIX && !disable_patches[i]) {
 			all_disabled = false;
 			break;
 		}
@@ -400,7 +403,7 @@ int main(int argc, const char *argv[]) {
 		puts("Patches that can be applied:");
 		for (Patch *patch = patches; patch->bytes != NULL; patch++) {
 			if (patch->state == ABLE) {
-				if (patch->type == UPX) {
+				if (patch->type == UPX || patch->type == BUGFIX) {
 					printf("* %s (required, I won't ask for confirmation)\n", patch->name);
 				} else {
 					printf("* %s\n", patch->name);
@@ -466,8 +469,9 @@ int main(int argc, const char *argv[]) {
 		}
 		if (patch->state == ABLE) {
 			bool able = false;
-			if (patch->type == UPX) {
+			if (patch->type == UPX || patch->type == BUGFIX) {
 				able = true;
+				printf("Applying %s...\n", patch->name);
 			} else {
 				if (patch->type == SCHED && !joy_patched) {
 					puts("It looks like the joystick patch wasn't applied. It's best to apply that if you're going to use the scheduler patch.");

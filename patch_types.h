@@ -18,6 +18,7 @@ typedef enum {
 	SCHED,
 	INPUTLAG,
 	RESET,
+	BUGFIX, // for when i messed up
 	TYPE_COUNT,
 } PatchType;
 
