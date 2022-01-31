@@ -29,6 +29,7 @@ gm8x_fix currently supports games made in the following versions of GameMaker:
 - 8.0
 - 8.1.65
 - 8.1.71
+- 8.1.91
 - 8.1.135
 - 8.1.140
 - 8.1.141

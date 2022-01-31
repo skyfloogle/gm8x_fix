@@ -44,6 +44,11 @@ Patch patches[] = {
 	{.bytes = inputlagpatch_81_71, .name = "GM8.1.71 input lag patch", .type = INPUTLAG},
 	{.bytes = dplaypatch_81_71, .name = "GM8.1.71 DirectPlay patch", .type = DPLAY},
 
+	{.bytes = joypatch_81_91, .name = "GM8.1.91 joystick patch", .type = JOY},
+	{.bytes = schedpatch_81_91, .name = "GM8.1.91 scheduler patch", .type = SCHED},
+	{.bytes = inputlagpatch_81_91, .name = "GM8.1.91 input lag patch", .type = INPUTLAG},
+	{.bytes = dplaypatch_81_91, .name = "GM8.1.91 DirectPlay patch", .type = DPLAY},
+
 	{.bytes = joypatch_81_135, .name = "GM8.1.135 joystick patch", .type = JOY},
 	{.bytes = schedpatch_81_135, .name = "GM8.1.135 scheduler patch", .type = SCHED},
 	{.bytes = inputlagpatch_81_135, .name = "GM8.1.135 input lag patch", .type = INPUTLAG},
@@ -61,7 +66,7 @@ Patch patches[] = {
 	{.bytes = dplaypatch_81_141, .name = "GM8.1.141 DirectPlay patch", .type = DPLAY},
 	
 	// the wall of shame
-	{.bytes = resetpatch_fix_81_141, .name = "gm8x_fix 5.5.5-5.5.6 bugfix", .type = BUGFIX},
+	{.bytes = resetpatch_fix_81_141, .name = "gm8x_fix 0.5.5-0.5.6 bugfix", .type = BUGFIX},
 	
 	{.bytes = NULL},
 };
@@ -312,7 +317,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.7!");
+	puts("Welcome to gm8x_fix v0.5.8!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything
