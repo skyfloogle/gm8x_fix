@@ -20,7 +20,8 @@
 #define wait() if (!silent) while (getchar() != '\n');
 
 Patch patches[] = {
-	{.bytes = upx_80, .name = "UPX unpacked header adjustment", .type = UPX},
+	{.bytes = upx_80_v0, .name = "UPX unpacked header adjustment (variant 0)", .type = UPX},
+	{.bytes = upx_80_v1, .name = "UPX unpacked header adjustment (variant 1)", .type = UPX},
 	{.bytes = mempatch, .name = "Memory patch", .type = MEM},
 
 	{.bytes = joypatch_70, .name = "GM7.0 joystick patch", .type = JOY},
@@ -317,7 +318,7 @@ int main(int argc, const char *argv[]) {
 		valid_args = false;
 	}
 	// funny title
-	puts("Welcome to gm8x_fix v0.5.8!");
+	puts("Welcome to gm8x_fix v0.5.9!");
 	puts("Source code is at https://github.com/skyfloogle/gm8x_fix under MIT license.");
 	puts("---------------------------------------------------------------------------");
 	// did the user decide to be a funnyman and disable everything

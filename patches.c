@@ -7,10 +7,16 @@ PatchByte mempatch[] = {
 };
 
 
-// UPX fix
+// UPX fix (and variants)
 // Fixes the file offset GM8 tries to load game data at in de-UPX'd games
-PatchByte upx_80[] = {
+PatchByte upx_80_v0[] = {
 	{0x144ac1, 0xa4, 0xf0},
+	{0x144ac2, 0x0a, 0x1c},
+	{-1,0,0}
+};
+
+PatchByte upx_80_v1[] = {
+	{0x144ac1, 0x9c, 0xf0},
 	{0x144ac2, 0x0a, 0x1c},
 	{-1,0,0}
 };
