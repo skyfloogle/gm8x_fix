@@ -93,7 +93,8 @@ close. This issue only affects specifically 8.1.141.
 ## The DirectPlay patch
 GameMaker games use DirectPlay for networking, but loading the DirectPlay DLL
 on newer versions of Windows brings up a prompt because DirectPlay is
-deprecated. In fact, on newer versions of Windows, it just doesn't work at all.<br/>
+deprecated. In fact, on newer versions of Windows, it just doesn't work at all,
+and does nothing other than drastically extend startup times.<br/>
 The patch replaces the attempt to load DirectPlay with an attempt to load
 literally nothing. This somehow doesn't break anything unless you're using the
 networking functions.
