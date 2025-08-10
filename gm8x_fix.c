@@ -106,6 +106,8 @@ static void strcatfn(char *s, const char *fn) {
 	strcat(s, "\"");
 #else
 	// unix files can have quotes so gotta sanitize
+	s += strlen(s);
+	*s++ = '"';
 	for (int i = 0; i < strlen(fn); i++) {
 		if (fn[i] != '"') {
 			*s++ = fn[i];
