@@ -17,6 +17,7 @@ Available options include:
 - `-ns` Don't offer scheduler patch.
 - `-nm` Don't offer memory patch.
 - `-nd` Don't offer DirectPlay patch.
+- `-nl` Don't offer keyboard_check_direct lag patch.
 
 If you're automating patching, take note that the program will exit with code
 1 on failure.
@@ -98,6 +99,14 @@ and does nothing other than drastically extend startup times.<br/>
 The patch replaces the attempt to load DirectPlay with an attempt to load
 literally nothing. This somehow doesn't break anything unless you're using the
 networking functions.
+
+## The keyboard_check_direct lag patch
+The keyboard_check_direct function is used by some games to read keyboard
+input. It returns true if the given key is down, or is the key was pressed
+since the last time keyboard_check_direct was called. This includes key
+repeats, so it can lead to stale values being read. This patch changes the
+function so that it only checks whether the key is down, and get rid of the
+other check.
 
 # So what's the catch?
 If the game used the builtin joystick functions, it will no longer work with
